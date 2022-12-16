@@ -1,0 +1,652 @@
+---
+title: "State of Open Data 2022"
+author: "Laurence Horton"
+date: "12/12/2022"
+output: html_document
+---
+
+```{r setup cleaning, include=FALSE}
+knitr::opts_chunk$set(fig.fullwidth = TRUE, echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+Research, N., & Goodey, G. (2022). State of Open Data Survey 2022 additional resources (Version 1). figshare. https://doi.org/10.6084/m9.figshare.21295422.v1
+```{r download 2016-2022 data file}
+download.file("https://figshare.com/ndownloader/articles/21295422/versions/1", basename("sod2022.zip"))
+unzip("sod2022.zip")
+```
+
+```{r remove zip file}
+unlink("sod2022.zip", recursive = TRUE)
+```
+
+```{r library, include = FALSE}
+library(tidyverse)
+library(readxl) # For reading in excel files
+library(scales) # For graphics breaks and labels
+library(knitr) # For tables
+library(polycor) # For ordinal variable correlations
+```
+
+```{r read in data}
+sod2022 <- read_excel("State of Open Data 2022_data to share.xlsx")
+```
+
+```{r ASCII}
+sod2022 <- as.data.frame(apply(sod2022, 2, function(sod2022) gsub("&amp;", "and", sod2022)))
+sod2022 <- as.data.frame(apply(sod2022, 2, function(sod2022) gsub("&", "and", sod2022)))
+sod2022 <- as.data.frame(apply(sod2022, 2, function(sod2022) gsub("’", "'", sod2022)))
+sod2022 <- as.data.frame(apply(sod2022, 2, function(sod2022) str_trim(sod2022)))
+```
+
+```{r rename columns}
+sod2022 <- rename(
+  sod2022,
+  Survey = "YearOfSurvey",
+  Q2.2 = "About you    In which year was your first peer-reviewed research article published?",
+  Q2.3 = "When was the last occasion that you published or submitted a manuscript to a journal?",
+  Q2.4 = "Which type of organisation do you work in? - Selected Choice",
+  Q2.5 = "Size of institution",
+  Q2.6 = "Which of the following job titles best applies to you?",
+  Q2.7 = "Which of the following best describes your primary area of interest? - Selected Choice",
+  Q2.9 = "Which country/ territory are you located in?",
+  Q2.9_1 = "Continent",
+  Q2.11_1 = "Attitudes to Open Science  To what extent do you agree/disagree with the following statements? - Making research articles open access should be common scholarly practice",
+  Q2.11_2 = "Attitudes to Open Science  To what extent do you agree/disagree with the following statements? - Making research data openly available should be common scholarly practice",
+  Q2.11_3 = "Attitudes to Open Science  To what extent do you agree/disagree with the following statements? - Making peer review open should be common scholarly practice",
+  Q2.11_4 = "Attitudes to Open Science  To what extent do you agree/disagree with the following statements? - Preprinting should be common scholarly practice",
+  Q3.1_1 = "Awareness of Open Data principles  How familiar are you with the following data principles in relation to Open Data? - FAIR data principles (i.e. Findable, Accessible, Interoperable and Reusable)",
+  Q3.1_2  = "Awareness of Open Data principles  How familiar are you with the following data principles in relation to Open Data? - CARE principles for Indigenous Data Governance (i.e. Collective benefit, Authority to control, Responsibility and Ethics)",
+  Q3.2  = "Attitudes towards sharing data  Do you think researchers currently get sufficient credit for sharing data?",
+  Q3.3_1  = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Full data citation",
+  Q3.3_2 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Citation of my research papers",
+  Q3.3_3 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Co-authorship on papers",
+  Q3.3_4 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Financial reward",
+  Q3.3_5 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Open data badge",
+  Q3.3_6 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Consideration in job reviews and funding applications",
+  Q3.3_7 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Funder requirement",
+  Q3.3_8 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Journal/Publisher requirement",
+  Q3.3_9 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Institution/Organisation requirement",
+  Q3.3_10 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Public benefit",
+  Q3.3_11 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Increased impact and visibility of my research",
+  Q3.3_12 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Greater transparency and reuse",
+  Q3.3_13 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Freedom of information request",
+  Q3.3_14 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Direct request from another research",
+  Q3.3_15 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - It was made simple and easy to do",
+  Q3.3_16 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - It was a field/industry expectation",
+  Q3.3_17 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.3_18 = "What circumstances would motivate you to share your data? (Please select all that apply) - Selected Choice - I would never share my data",
+  Q3.4 = "Which one of the circumstances would motivate you the most to share your data? - Selected Choice",
+  Q3.4_1 = "Which one of the circumstances would motivate you the most to share your data? - Other (please specify) - Text",
+  Q3.5_1 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - I have no problems/concerns about sharing data",
+  Q3.5_2 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Contains sensitive information or require study participant permissions before sharing",
+  Q3.5_3 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Lack of time to deposit data",
+  Q3.5_4 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Costs of sharing data",
+  Q3.5_5 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Unsure about copyright and data licensing",
+  Q3.5_6 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Data are too large to share",
+  Q3.5_7 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - I do not know what repository to use",
+  Q3.5_8 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - I am unsure I have permission from my funder or institute to share my data",
+  Q3.5_9 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Data are too small or unimportant",
+  Q3.5_10 =  "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Organising data in a presentable and usable way",
+  Q3.5_11 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Concerns about misuse of data",
+  Q3.5_12 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Not receiving appropriate credit or acknowledgement",
+  Q3.5_13 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Another lab may make a different interpretation of my data",
+  Q3.5_14 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Another lab may 'scoop' (or has already 'scooped') me to a discovery",
+  Q3.5_15 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - I'm not sure I've exhausted all the potential findings yet",
+  Q3.5_16 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Others may find errors in my data",
+  Q3.5_17 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Others may not be able to repeat my findings",
+  Q3.5_18 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.5_19 = "What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply) - Selected Choice - I have no desire to share my data",
+  Q3.6_1 = "How do you think the data shared by others has or could benefit you? (Please select all that apply) - Selected Choice - Fosters collaboration",
+  Q3.6_2 = "How do you think the data shared by others has or could benefit you? (Please select all that apply) - Selected Choice - Validates my own research findings",
+  Q3.6_3 = "How do you think the data shared by others has or could benefit you? (Please select all that apply) - Selected Choice - Complements existing data I have collected",
+  Q3.6_4 = "How do you think the data shared by others has or could benefit you? (Please select all that apply) - Selected Choice - Avoids duplication of effort",
+  Q3.6_5 = "How do you think the data shared by others has or could benefit you? (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.6_6 = "How do you think the data shared by others has or could benefit you? (Please select all that apply) - Selected Choice - It hasn't/would not benefit me",
+  Q3.7 = "Planning data management  Are you aware of the concept of a data management plan?",
+  Q3.8 = "To what extent do you feel capable of developing a practical data management plan if you were required to do so?",
+  Q3.9 = "Have you ever created a data management plan?",
+  Q3.10_1 = "What were the key reasons that led you to creating a data management plan? (Please select all that apply) - It was a requirement of my current funder",
+  Q3.10_2 = "What were the key reasons that led you to creating a data management plan? (Please select all that apply) - It was a requirement of my institution",
+  Q3.10_3 = "What were the key reasons that led you to creating a data management plan? (Please select all that apply) - It is a requirement of the journal I plan to submit to",
+  Q3.10_4 = "What were the key reasons that led you to creating a data management plan? (Please select all that apply) - It was suggested by my supervisor",
+  Q3.10_5 = "What were the key reasons that led you to creating a data management plan? (Please select all that apply) - It is an expectation/norm within my field of research",
+  Q3.10_6 = "What were the key reasons that led you to creating a data management plan? (Please select all that apply) - Personal choice (i.e. no specific requirement)",
+  Q3.10_7 = "What were the key reasons that led you to creating a data management plan? (Please select all that apply) - No specific reason",
+  Q3.10_8 = "What were the key reasons that led you to creating a data management plan? (Please select all that apply) - I don't know",
+  Q3.11 = "To what extent did you implement the data management plan for the last project you completed?",
+  Q3.12 = "To what extent have you implemented your data management plan for your current project?",
+  Q3.13_1 = "What, if any, challenges have you experienced in implementing data management plans?  (Please select all that apply) - Selected Choice - I have forgotten to follow the plan",
+  Q3.13_2 = "What, if any, challenges have you experienced in implementing data management plans?  (Please select all that apply) - Selected Choice - The plan was too ambitious for my funds",
+  Q3.13_3 = "What, if any, challenges have you experienced in implementing data management plans?  (Please select all that apply) - Selected Choice - The plan was too demanding of my time",
+  Q3.13_4 = "What, if any, challenges have you experienced in implementing data management plans?  (Please select all that apply) - Selected Choice - Our research changed so that the plan was no longer valid",
+  Q3.13_5 = "What, if any, challenges have you experienced in implementing data management plans?  (Please select all that apply) - Selected Choice - I experienced technical challenges (e.g. where to store data, how to organise data)",
+  Q3.13_6 = "What, if any, challenges have you experienced in implementing data management plans?  (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.13_7 = "What, if any, challenges have you experienced in implementing data management plans?  (Please select all that apply) - Selected Choice - I have not experienced any challenges in implementing a data management plan",
+  Q3.14_1 = "In which, if any, aspects of data management planning do you feel you would benefit from further skills training/information?  (Please select all that apply) - Selected Choice - Defining the data to be produced and how it is acquired",
+  Q3.14_2 = "In which, if any, aspects of data management planning do you feel you would benefit from further skills training/information?  (Please select all that apply) - Selected Choice - Metadata descriptions",
+  Q3.14_3 = "In which, if any, aspects of data management planning do you feel you would benefit from further skills training/information?  (Please select all that apply) - Selected Choice - Understanding and defining policies for access, sharing and reuse",
+  Q3.14_4 = "In which, if any, aspects of data management planning do you feel you would benefit from further skills training/information?  (Please select all that apply) - Selected Choice - Long-term storage and data management strategies" ,
+  Q3.14_5 = "In which, if any, aspects of data management planning do you feel you would benefit from further skills training/information?  (Please select all that apply) - Selected Choice - Costing and budget planning" ,
+  Q3.14_6 = "In which, if any, aspects of data management planning do you feel you would benefit from further skills training/information?  (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.14_7 = "In which, if any, aspects of data management planning do you feel you would benefit from further skills training/information?  (Please select all that apply) - Selected Choice - None of the above",
+  Q3.15 = "Collection and curation of research data  Do you curate/prepare your data for sharing (during or after the data collection process) either privately or publicly? - Selected Choice",
+  Q3.16_1 = "Where do you store your research data while your project is underway?  (Please select all that apply) - Selected Choice - Personal computer (hard drive)",
+  Q3.16_2 = "Where do you store your research data while your project is underway?  (Please select all that apply) - Selected Choice - Personal cloud storage",
+  Q3.16_3 = "Where do you store your research data while your project is underway?  (Please select all that apply) - Selected Choice - Institutional computer (hard drive)",
+  Q3.16_4 = "Where do you store your research data while your project is underway?  (Please select all that apply) - Selected Choice - Institutional network",
+  Q3.16_5 = "Where do you store your research data while your project is underway?  (Please select all that apply) - Selected Choice - Institutional repository",
+  Q3.16_6 = "Where do you store your research data while your project is underway?  (Please select all that apply) - Selected Choice - Physical storage (e.g. notebooks)",
+  Q3.16_7 = "Where do you store your research data while your project is underway?  (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.17_1 = "Would you be willing to allow any of the following to help review, curate, or prepare your data for making it publicly available?  (Please select all that apply) - Selected Choice - Library",
+  Q3.17_2 = "Would you be willing to allow any of the following to help review, curate, or prepare your data for making it publicly available?  (Please select all that apply) - Selected Choice - Peers",
+  Q3.17_3 = "Would you be willing to allow any of the following to help review, curate, or prepare your data for making it publicly available?  (Please select all that apply) - Selected Choice - Publisher",
+  Q3.17_4 = "Would you be willing to allow any of the following to help review, curate, or prepare your data for making it publicly available?  (Please select all that apply) - Selected Choice - Professional service",
+  Q3.17_5 = "Would you be willing to allow any of the following to help review, curate, or prepare your data for making it publicly available?  (Please select all that apply) - Selected Choice - Funder",
+  Q3.17_6 = "Would you be willing to allow any of the following to help review, curate, or prepare your data for making it publicly available?  (Please select all that apply) - Selected Choice - Research Office",
+  Q3.17_7 = "Would you be willing to allow any of the following to help review, curate, or prepare your data for making it publicly available?  (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.17_8 = "Would you be willing to allow any of the following to help review, curate, or prepare your data for making it publicly available?  (Please select all that apply) - Selected Choice - None of the above",
+  Q3.18_1 = "What areas, if any, do you feel you need help with in regards to managing your research data during the collection period?  (Please select all that apply) - Selected Choice - Finding the time to curate data",
+  Q3.18_2 = "What areas, if any, do you feel you need help with in regards to managing your research data during the collection period?  (Please select all that apply) - Selected Choice - Collaborating with other teams",
+  Q3.18_3 = "What areas, if any, do you feel you need help with in regards to managing your research data during the collection period?  (Please select all that apply) - Selected Choice - Finding appropriate repositories for deposition of data",
+  Q3.18_4 = "What areas, if any, do you feel you need help with in regards to managing your research data during the collection period?  (Please select all that apply) - Selected Choice - Finding the funds for continued management/storage",
+  Q3.18_5 = "What areas, if any, do you feel you need help with in regards to managing your research data during the collection period?  (Please select all that apply) - Selected Choice - Applying metadata",
+  Q3.18_6 = "What areas, if any, do you feel you need help with in regards to managing your research data during the collection period?  (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.18_7 = "What areas, if any, do you feel you need help with in regards to managing your research data during the collection period?  (Please select all that apply) - Selected Choice - None of the above",
+  Q3.19 = "At which point during the research cycle, if at all, do you make your data available?",
+  Q3.20_1 = "How do you share your research data with a public audience? (Please select all that apply) - Selected Choice - Institutional repository" ,
+  Q3.20_2 = "How do you share your research data with a public audience? (Please select all that apply) - Selected Choice - Funder repository",
+  Q3.20_3 = "How do you share your research data with a public audience? (Please select all that apply) - Selected Choice - External repository (e.g. figshare, Zenodo)",
+  Q3.20_4 = "How do you share your research data with a public audience? (Please select all that apply) - Selected Choice - Supplementary information attached to a research article",
+  Q3.20_5 = "How do you share your research data with a public audience? (Please select all that apply) - Selected Choice - Blog / website",
+  Q3.20_6 = "How do you share your research data with a public audience? (Please select all that apply) - Selected Choice - Cloud file sharing (e.g. Dropbox, Google Drive)",
+  Q3.20_7 = "How do you share your research data with a public audience? (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.21_1 = "To what extent do you think you make your data open in compliance with:  [Note: by open we mean free to access, reuse, repurpose and redistribute] - FAIR data principles (i.e. Findable, Accessible, Interoperable and Reusable)",
+  Q3.21_2 = "To what extent do you think you make your data open in compliance with:  [Note: by open we mean free to access, reuse, repurpose and redistribute] - CARE principles for Indigenous Data Governance (i.e. Collective benefit, Authority to control, Responsibility and Ethics)",
+  Q3.22_1 = "To what extent do you think researchers in your field more generally make their data open in compliance with:  [Note: by open we mean free to access, reuse, repurpose and redistribute] - FAIR data principles (i.e. Findable, Accessible, Interoperable and Reusable)",
+  Q3.22_2 = "To what extent do you think researchers in your field more generally make their data open in compliance with:  [Note: by open we mean free to access, reuse, repurpose and redistribute] - CARE principles for Indigenous Data Governance (i.e. Collective benefit, Authority to control, Responsibility and Ethics)",
+  Q3.23_1 = "What recognition have you received for sharing your research data? (Please select all that apply) - Selected Choice - Full citation in another article",
+  Q3.23_2 = "What recognition have you received for sharing your research data? (Please select all that apply) - Selected Choice - Co-authorship on a paper which used my data",
+  Q3.23_3 = "What recognition have you received for sharing your research data? (Please select all that apply) - Selected Choice - Financial reward",
+  Q3.23_4 = "What recognition have you received for sharing your research data? (Please select all that apply) - Selected Choice - Consideration of data sharing in a job review",
+  Q3.23_5 = "What recognition have you received for sharing your research data? (Please select all that apply) - Selected Choice - Consideration of data sharing in a grant application",
+  Q3.23_6 = "What recognition have you received for sharing your research data? (Please select all that apply) - Selected Choice - Open data badge",
+  Q3.23_7 = "What recognition have you received for sharing your research data? (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.23_8 = "What recognition have you received for sharing your research data? (Please select all that apply) - Selected Choice - I have never received credit/recognition for sharing data",
+  Q3.23_9 = "What recognition have you received for sharing your research data? (Please select all that apply) - Selected Choice - I don't know",
+  Q3.24 = "Have you ever been involved in a collaboration as a result of data you have previously shared?",
+  Q3.25 = "Who would/does meet the costs of making your research data openly accessible (e.g. resource for curation)?",
+  Q3.26_1 = "To what extent are you comfortable with others using your data for the following?: - Replication studies (use of your data as a reference to determine whether they can be repeated under similar conditions)",
+  Q3.26_2 = "To what extent are you comfortable with others using your data for the following?: - Reanalysis (using a different method to analyse your data set)",
+  Q3.26_3 = "To what extent are you comfortable with others using your data for the following?: - Reinterpretation (using your data as is to answer another question)",
+  Q3.26_4 = "To what extent are you comfortable with others using your data for the following?: - Isolated reuse (reanalysing your data to answer a new question)",
+  Q3.26_5 = "To what extent are you comfortable with others using your data for the following?: - Combination reuse (reanalysing your data in combination with other data sets to answer a new question)",
+  Q3.27_1 = "What areas, if any, do you feel you need help with in regard to making your research data openly available? (Please select all that apply) - Selected Choice - Finding the time to manage my data",
+  Q3.27_2 = "What areas, if any, do you feel you need help with in regard to making your research data openly available? (Please select all that apply) - Selected Choice - Copyright/Licensing of data",
+  Q3.27_3 = "What areas, if any, do you feel you need help with in regard to making your research data openly available? (Please select all that apply) - Selected Choice - Data management policies",
+  Q3.27_4 = "What areas, if any, do you feel you need help with in regard to making your research data openly available? (Please select all that apply) - Selected Choice - Finding appropriate repositories for deposition of data",
+  Q3.27_5 = "What areas, if any, do you feel you need help with in regard to making your research data openly available? (Please select all that apply) - Selected Choice - Finding appropriate funds for deposition of data long term",
+  Q3.27_6 = "What areas, if any, do you feel you need help with in regard to making your research data openly available? (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.27_7 = "What areas, if any, do you feel you need help with in regard to making your research data openly available? (Please select all that apply) - Selected Choice - None of the above",
+  Q3.28_1 = "Discovery, reuse and citation of Open Data Since January 2020, have you reused any of the below as part of your research?: (Please select all that apply) [Note: by 'reuse' we mean undertaking new analysis of a pre-existing data set, either on its own or to add to another data set, to answer a different research question to that which the collection of data was originally intended] - Your own data",
+  Q3.28_2 = "Discovery, reuse and citation of Open Data Since January 2020, have you reused any of the below as part of your research?: (Please select all that apply) [Note: by 'reuse' we mean undertaking new analysis of a pre-existing data set, either on its own or to add to another data set, to answer a different research question to that which the collection of data was originally intended] - Openly accessible data shared by other research groups",
+  Q3.28_3 = "Discovery, reuse and citation of Open Data Since January 2020, have you reused any of the below as part of your research?: (Please select all that apply) [Note: by 'reuse' we mean undertaking new analysis of a pre-existing data set, either on its own or to add to another data set, to answer a different research question to that which the collection of data was originally intended] - Data which was not openly accessible and you had to request",
+  Q3.28_4 = "Discovery, reuse and citation of Open Data Since January 2020, have you reused any of the below as part of your research?: (Please select all that apply) [Note: by 'reuse' we mean undertaking new analysis of a pre-existing data set, either on its own or to add to another data set, to answer a different research question to that which the collection of data was originally intended] - Neither of the above",
+  Q3.29_1 = "To what extent has the COVID-19 pandemic affected your reuse of data? - Your own data",
+  Q3.29_2 = "To what extent has the COVID-19 pandemic affected your reuse of data? - Data shared by other research groups (whether openly or on personal request",
+  Q3.30_1 = "Where have you previously obtained research data which has been collected by other research groups, for your own reuse? (Please select all that apply) - Selected Choice - Directly from the research group who collected the data (e.g. via email)",
+  Q3.30_2 = "Where have you previously obtained research data which has been collected by other research groups, for your own reuse? (Please select all that apply) - Selected Choice - Downloaded directly from a data repository",
+  Q3.30_3 = "Where have you previously obtained research data which has been collected by other research groups, for your own reuse? (Please select all that apply) - Selected Choice - Data were available within a published research article",
+  Q3.30_4 = "Where have you previously obtained research data which has been collected by other research groups, for your own reuse? (Please select all that apply) - Selected Choice - Data were linked from a published data article",
+  Q3.30_5 = "Where have you previously obtained research data which has been collected by other research groups, for your own reuse? (Please select all that apply) - Selected Choice - Online",
+  Q3.30_6 = "Where have you previously obtained research data which has been collected by other research groups, for your own reuse? (Please select all that apply) - Selected Choice - Data were available from a blog post",
+  Q3.30_7 = "Where have you previously obtained research data which has been collected by other research groups, for your own reuse? (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.31_1 = "How would you rate the importance of each of the following with reference to determining the quality of an openly accessible data set?  [Note: by open we mean free to access, reuse, repurpose and redistribute] - The data are available from a publicly available repository",
+  Q3.31_2 = "How would you rate the importance of each of the following with reference to determining the quality of an openly accessible data set?  [Note: by open we mean free to access, reuse, repurpose and redistribute] - The data are new (e.g. released within the last year)",
+  Q3.31_3 = "How would you rate the importance of each of the following with reference to determining the quality of an openly accessible data set?  [Note: by open we mean free to access, reuse, repurpose and redistribute] - The data come from a known source (e.g. familiar institution or academic)",
+  Q3.31_4 = "How would you rate the importance of each of the following with reference to determining the quality of an openly accessible data set?  [Note: by open we mean free to access, reuse, repurpose and redistribute] - The data are in a repository that I know checks/curates the data",
+  Q3.31_5 = "How would you rate the importance of each of the following with reference to determining the quality of an openly accessible data set?  [Note: by open we mean free to access, reuse, repurpose and redistribute] - The data are associated with a peer-reviewed article",
+  Q3.31_6 = "How would you rate the importance of each of the following with reference to determining the quality of an openly accessible data set?  [Note: by open we mean free to access, reuse, repurpose and redistribute] - Data visualisations (e.g. figures, charts) reflect the true state of the source data",
+  Q3.31_7 = "How would you rate the importance of each of the following with reference to determining the quality of an openly accessible data set?  [Note: by open we mean free to access, reuse, repurpose and redistribute] - Data is consistent with previously published findings",
+  Q3.31_8 = "How would you rate the importance of each of the following with reference to determining the quality of an openly accessible data set?  [Note: by open we mean free to access, reuse, repurpose and redistribute] - The data set is complete for my needs",
+  Q3.31_9 = "How would you rate the importance of each of the following with reference to determining the quality of an openly accessible data set?  [Note: by open we mean free to access, reuse, repurpose and redistribute] - Associated metadata give me confidence in the quality of the data",
+  Q3.32 = "Has your request and/or reuse of a dataset ever resulted in a collaboration?",
+  Q3.33_1 = "Support for researchers and Open Data  If you required help with managing or making your research data openly available, which sources would you rely upon? (Please select all that apply) [Note: by open we mean free to access, reuse, repurpose and redistribute] - Selected Choice - Open data software provider",
+  Q3.33_2 = "Support for researchers and Open Data  If you required help with managing or making your research data openly available, which sources would you rely upon? (Please select all that apply) [Note: by open we mean free to access, reuse, repurpose and redistribute] - Selected Choice - Colleague/Supervisor",
+  Q3.33_3 = "Support for researchers and Open Data  If you required help with managing or making your research data openly available, which sources would you rely upon? (Please select all that apply) [Note: by open we mean free to access, reuse, repurpose and redistribute] - Selected Choice - Web-search",
+  Q3.33_4 = "Support for researchers and Open Data  If you required help with managing or making your research data openly available, which sources would you rely upon? (Please select all that apply) [Note: by open we mean free to access, reuse, repurpose and redistribute] - Selected Choice - Institutional Library",
+  Q3.33_5 = "Support for researchers and Open Data  If you required help with managing or making your research data openly available, which sources would you rely upon? (Please select all that apply) [Note: by open we mean free to access, reuse, repurpose and redistribute] - Selected Choice - Publisher",
+  Q3.33_6 = "Support for researchers and Open Data  If you required help with managing or making your research data openly available, which sources would you rely upon? (Please select all that apply) [Note: by open we mean free to access, reuse, repurpose and redistribute] - Selected Choice - Funder",
+  Q3.33_7 = "Support for researchers and Open Data  If you required help with managing or making your research data openly available, which sources would you rely upon? (Please select all that apply) [Note: by open we mean free to access, reuse, repurpose and redistribute] - Selected Choice - Research office/In-house institutional expertise",
+  Q3.33_8 = "Support for researchers and Open Data  If you required help with managing or making your research data openly available, which sources would you rely upon? (Please select all that apply) [Note: by open we mean free to access, reuse, repurpose and redistribute] - Selected Choice - Professional third party",
+  Q3.33_9 = "Support for researchers and Open Data  If you required help with managing or making your research data openly available, which sources would you rely upon? (Please select all that apply) [Note: by open we mean free to access, reuse, repurpose and redistribute] - Selected Choice - Repository",
+  Q3.33_10 = "Support for researchers and Open Data  If you required help with managing or making your research data openly available, which sources would you rely upon? (Please select all that apply) [Note: by open we mean free to access, reuse, repurpose and redistribute] - Selected Choice - Other (please specify)",
+  Q3.33_11 = "Support for researchers and Open Data  If you required help with managing or making your research data openly available, which sources would you rely upon? (Please select all that apply) [Note: by open we mean free to access, reuse, repurpose and redistribute] - Selected Choice - I would not require help making my data openly available",
+  Q3.34 = "Have you ever received any support with planning, managing or sharing your research data?",
+  Q3.35_1 = "Who did you receive support from?  (Please select all that apply) - Selected Choice - Open data software provider",
+  Q3.35_2 = "Who did you receive support from?  (Please select all that apply) - Selected Choice - Colleague/Supervisor",
+  Q3.35_3 = "Who did you receive support from?  (Please select all that apply) - Selected Choice - Web-search",
+  Q3.35_4 = "Who did you receive support from?  (Please select all that apply) - Selected Choice - Institutional library",
+  Q3.35_5 = "Who did you receive support from?  (Please select all that apply) - Selected Choice - Publisher",
+  Q3.35_6 = "Who did you receive support from?  (Please select all that apply) - Selected Choice - Funder",
+  Q3.35_7 = "Who did you receive support from?  (Please select all that apply) - Selected Choice - Research Office/In-house institutional expertise",
+  Q3.35_8 = "Who did you receive support from?  (Please select all that apply) - Selected Choice - Professional third party",
+  Q3.35_9 = "Who did you receive support from?  (Please select all that apply) - Selected Choice - Repository",
+  Q3.35_10 = "Who did you receive support from?  (Please select all that apply) - Selected Choice - Other (please specify)",
+  Q3.36_1 = "What level of support do you think is available from the following if you needed help in planning, managing or sharing your research data? - Institution/Organisation",
+  Q3.36_2 = "What level of support do you think is available from the following if you needed help in planning, managing or sharing your research data? - Funder",
+  Q3.36_3 = "What level of support do you think is available from the following if you needed help in planning, managing or sharing your research data? - Publisher",
+  Q3.37_1 = "Considering your most recent piece of research, which, if any, of the following have a policy on data sharing?  (Please select all that apply) - Funder",
+  Q3.37_2 = "Considering your most recent piece of research, which, if any, of the following have a policy on data sharing?  (Please select all that apply) - Institution",
+  Q3.37_3 = "Considering your most recent piece of research, which, if any, of the following have a policy on data sharing?  (Please select all that apply) - Department/Faculty",
+  Q3.37_4 = "Considering your most recent piece of research, which, if any, of the following have a policy on data sharing?  (Please select all that apply) - Publisher",
+  Q3.37_5 = "Considering your most recent piece of research, which, if any, of the following have a policy on data sharing?  (Please select all that apply) - Government",
+  Q3.37_6 = "Considering your most recent piece of research, which, if any, of the following have a policy on data sharing?  (Please select all that apply) - None of the above",
+  Q3.37_7 = "Considering your most recent piece of research, which, if any, of the following have a policy on data sharing?  (Please select all that apply) - I don't know",
+  Q3.38_1 = "Would you like more guidance on how to comply with the policies of any of the below on making your research data openly available? (Please select all that apply) - Funder",
+  Q3.38_2 = "Would you like more guidance on how to comply with the policies of any of the below on making your research data openly available? (Please select all that apply) - Institution",
+  Q3.38_3 = "Would you like more guidance on how to comply with the policies of any of the below on making your research data openly available? (Please select all that apply) - Department or faculty",
+  Q3.38_4 = "Would you like more guidance on how to comply with the policies of any of the below on making your research data openly available? (Please select all that apply) - Government",
+  Q3.38_5 = "Would you like more guidance on how to comply with the policies of any of the below on making your research data openly available? (Please select all that apply) - Publisher",
+  Q3.38_6 = "Would you like more guidance on how to comply with the policies of any of the below on making your research data openly available? (Please select all that apply) - None of the above",
+  Q3.39 = "How supportive would you be of a national mandate for making research data openly available?",
+  Q3.40 = "Should funders make the sharing of research data part of their requirements for awarding grants?",
+  Q3.41 = "Should funders withhold funding from (or penalise in other ways) researchers who do not share their data if the funder has mandated that they do so at the grant application stage?"
+)     
+```
+
+```{r make survey year numeric}
+sod2022$Survey <- as.numeric(as.character(sod2022$Survey))
+sod2022$Q2.2 <- as.numeric(as.character(sod2022$Q2.2))
+```
+
+```{r Q2.4 Standardise responses}
+#Q2.4
+sod2022$Q2.4[sod2022$Q2.4 == 0] <- NA
+sod2022$Q2.4 <- gsub("Medical School", "Medical school", sod2022$Q2.4)
+sod2022$Q2.4 <- gsub("Government / Local government", "Government/local government", sod2022$Q2.4)
+sod2022$Q2.4 <- gsub(":", "", sod2022$Q2.4)
+```
+```{r Q2.11 Standardise responses}
+sod2022$Q2.11_1 <- gsub("Neutral / No opinion", "Neutral", sod2022$Q2.11_1)
+sod2022$Q2.11_2 <- gsub("Neutral / No opinion", "Neutral", sod2022$Q2.11_2)
+sod2022$Q2.11_4 <- gsub("Neutral / No opinion", "Neutral", sod2022$Q2.11_4)
+```
+```{r Q3.1_1 Standardise responses}
+sod2022$Q3.1_1 <- gsub("I am familiar with the data principles", "I am familiar with the FAIR principles", sod2022$Q3.1_1)                                              
+sod2022$Q3.1_1 <- gsub("I have never heard of the data principles before now", "I have never heard of the FAIR data principles before now", sod2022$Q3.1_1)                          
+sod2022$Q3.1_1 <- gsub("I have previously heard of the data principles but I am not familiar with them", "I have previously heard of the FAIR data principles but I am not familiar with them", sod2022$Q3.1_1) 
+sod2022$Q3.1_1 <- gsub("I have previously heard of the FAIR principles but I'm not familiar with them", "I have previously heard of the FAIR principles but I am not familiar with them", sod2022$Q3.1_1)
+sod2022$Q3.1_1 <- gsub("I've never heard of the FAIR principles before now", "I have never heard of the FAIR data principles before now", sod2022$Q3.1_1)
+sod2022$Q3.1_1 <- gsub("I have never heard of the FAIR principles before now", "I have never heard of the FAIR data principles before now", sod2022$Q3.1_1)
+sod2022$Q3.1_1 <- gsub("I have previously heard of the FAIR principles but I am not familiar with them", "I have previously heard of the FAIR data principles but I am not familiar with them", sod2022$Q3.1_1)
+sod2022$Q3.1_1 <- gsub("I am familiar with the FAIR principles", "I am familiar with the FAIR data principles", sod2022$Q3.1_1)
+```
+```{r Q3.6 standerdise responses}
+sod2022[, c(63:68)] <- as.data.frame(apply(sod2022[, c(63:68)], 2, function(sod2022) { as.character(gsub("Avoid duplication of effort", "Avoids duplication of effort", sod2022))}))
+
+sod2022[, c(63:68)] <- as.data.frame(apply(sod2022[, c(63:68)], 2, function(sod2022) { as.character(gsub("Complement existing data I have collected", "Complement existing data collected", sod2022))}))
+
+sod2022[, c(63:68)] <- as.data.frame(apply(sod2022[, c(63:68)], 2, function(sod2022) { as.character(gsub("Complements existing data I have collected", "Complement existing data collected", sod2022))}))
+
+sod2022[, c(63:68)] <- as.data.frame(apply(sod2022[, c(63:68)], 2, function(sod2022) { as.character(gsub("Complements existing data you have collected", "Complement existing data collected", sod2022))}))
+
+sod2022[, c(63:68)] <- as.data.frame(apply(sod2022[, c(63:68)], 2, function(sod2022) { as.character(gsub("Foster collaboration", "Fosters collaboration", sod2022))}))
+
+sod2022[, c(63:68)] <- as.data.frame(apply(sod2022[, c(63:68)], 2, function(sod2022) { as.character(gsub("I hasn't/would not benefit me", "It has not or would not benefit me", sod2022))}))
+
+sod2022[, c(63:68)] <- as.data.frame(apply(sod2022[, c(63:68)], 2, function(sod2022) { as.character(gsub("It hasn't/would not benefit me", "It has not or would not benefit me", sod2022))}))
+
+sod2022[, c(63:68)] <- as.data.frame(apply(sod2022[, c(63:68)], 2, function(sod2022) {
+ as.character(gsub("Validate my own research findings", "Validates own findings", sod2022))}))
+
+sod2022[, c(63:68)] <- as.data.frame(apply(sod2022[, c(63:68)], 2, function(sod2022) {
+ as.character(gsub("Validates my own research findings", "Validates own findings", sod2022))}))
+```
+```{r Q5.2 standardise responses}
+sod2022[, c(24:41)] <- as.data.frame(apply(sod2022[, c(24:41)], 2, function(sod2022) { as.character(gsub("Direct request from other researcher", "Direct request from another research", sod2022))}))
+
+sod2022[, c(24:41)] <- as.data.frame(apply(sod2022[, c(24:41)], 2, function(sod2022) { as.character(gsub("Greater transparency and reuse", "Transparency and re-use", sod2022))}))
+
+sod2022[, c(24:41)] <- as.data.frame(apply(sod2022[, c(24:41)], 2, function(sod2022) { as.character(gsub("Institution\\/organisation requirement", "Institution or Organisation requirement", sod2022))}))
+
+sod2022[, c(24:41)] <- as.data.frame(apply(sod2022[, c(24:41)], 2, function(sod2022) { as.character(gsub("Institution\\/Organisation requirement", "Institution or Organisation requirement", sod2022))}))
+
+sod2022[, c(24:41)] <- as.data.frame(apply(sod2022[, c(24:41)], 2, function(sod2022) { as.character(gsub("Institution\\/organization requirement", "Institution or Organisation requirement", sod2022))}))
+
+sod2022[, c(24:41)] <- as.data.frame(apply(sod2022[, c(24:41)], 2,
+ function(sod2022) { as.character(gsub("It was made easy and simple to do so", "It was made simple and easy to do", sod2022))}))
+
+sod2022[, c(24:41)] <- as.data.frame(apply(sod2022[, c(24:41)], 2, function(sod2022) { as.character(gsub("It was made simple and easy to do so", "It was made simple and easy to do", sod2022))}))
+
+sod2022[, c(24:41)] <- as.data.frame(apply(sod2022[, c(24:41)], 2, function(sod2022) { as.character(gsub("Journal\\/publisher requirement", "Journal or Publisher requirement", sod2022))}))
+
+sod2022[, c(24:41)] <- as.data.frame(apply(sod2022[, c(24:41)], 2, function(sod2022) { as.character(gsub("Journal\\/Publisher requirement", "Journal or Publisher requirement", sod2022))}))
+```
+
+```{r Q3.5 Standardise responses}
+# Q3.5
+sod2022[, c(44:62)] <- as.data.frame(apply(sod2022[, c(44:62)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Contain sensitive information or require permissions before sharing", "Contain sensitive information", sod2022))
+                                       }))
+
+sod2022[, c(44:62)] <- as.data.frame(apply(sod2022[, c(44:62)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Contains sensitive information or require study participant permissions before sharing", "Contain sensitive information", sod2022))
+                                       }))
+
+sod2022[, c(44:62)] <- as.data.frame(apply(sod2022[, c(44:62)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Unsure about copyright and data licensing", "Unsure about copyright licensing", sod2022))
+                                       }))
+
+sod2022[, c(44:62)] <- as.data.frame(apply(sod2022[, c(44:62)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Unsure about copyright and licensing", "Unsure about copyright licensing", sod2022))
+                                       }))
+
+sod2022[, c(44:62)] <- as.data.frame(apply(sod2022[, c(44:62)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("I do not know what repository to use", "Not know what repository to use", sod2022))
+                                       }))
+
+sod2022[, c(44:62)] <- as.data.frame(apply(sod2022[, c(44:62)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Not knowing which repository to use", "Not know what repository to use", sod2022))
+                                       }))
+
+sod2022[, c(44:62)] <- as.data.frame(apply(sod2022[, c(44:62)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("I am unsure I have permission from my funder or institute to share my data", "Unsure I have the permission to share", sod2022))
+                                       }))
+
+sod2022[, c(44:62)] <- as.data.frame(apply(sod2022[, c(44:62)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Unsure I have the rights to share", "Unsure I have the permission to share", sod2022))
+                                       }))
+
+sod2022[, c(44:62)] <- as.data.frame(apply(sod2022[, c(44:62)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Concerns about misuse of my data", "Concerns about misuse of data", sod2022))
+                                       }))
+
+sod2022[, c(44:62)] <- as.data.frame(apply(sod2022[, c(44:62)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Not receiving appropriate credit or knowledge", "Not receiving appropriate credit or acknowledgement", sod2022))
+                                       }))
+
+sod2022[, c(44:62)] <- as.data.frame(apply(sod2022[, c(44:62)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("I have no desire to share data", "I have no desire to share my data", sod2022))
+                                       }))
+```
+
+```{r Q3.11 Spelling error}
+sod2022$Q3.11 <- gsub("Enitrely", "Entirely", sod2022$Q3.11)
+```
+
+```{r Q3.15 Standardise responses}
+sod2022$Q3.15 <- gsub("its", "it's", sod2022$Q3.15)
+sod2022$Q3.15 <- gsub(" ,", ",", sod2022$Q3.15)
+sod2022$Q3.15 <- gsub("of the data collected", "", sod2022$Q3.15)
+sod2022$Q3.15 <- gsub(" collected", "", sod2022$Q3.15)
+sod2022$Q3.15 <- gsub("\\:", "", sod2022$Q3.15)
+sod2022$Q3.15 <- gsub("we would", "would", sod2022$Q3.15)
+sod2022$Q3.15 <- gsub("some data", "some", sod2022$Q3.15)
+sod2022$Q3.15 <- gsub("some ", "some", sod2022$Q3.15)
+sod2022$Q3.15 <- gsub("No, it is not important with our data", "No, not important", sod2022$Q3.15)
+sod2022$Q3.15 <- gsub("Yes, but only data to be shared with colleagues or beyond", "Yes, but only data shared with colleagues or beyond", sod2022$Q3.15)
+sod2022$Q3.15 <- gsub("No, we do not have the resource to do this but would like to", "No, we don’t have the resource to do this but would like to", sod2022$Q3.15)
+```
+
+```{r Q3.20_3 Standardise responses}
+sod2022$Q3.20_3 <-
+  recode_factor(sod2022$Q3.20_3,
+                "External repository (e.g. Figshare, Zenodo)" = "External repository (e.g. figshare, Zenodo)"
+                )
+```
+
+```{r Q3.25 Standardise responses}
+#Q3.25
+sod2022$Q3.25 <- gsub("those no", "not", sod2022$Q3.25)
+sod2022$Q3.25 <- gsub("ie ", "i.e. ", sod2022$Q3.25)
+sod2022$Q3.25 <- gsub("My own funds", "Own funds", sod2022$Q3.25)
+sod2022$Q3.25 <- gsub("Your institution/organisation", "Your institution", sod2022$Q3.25)
+sod2022$Q3.25 <- gsub("\\(", "", sod2022$Q3.25)
+sod2022$Q3.25 <- gsub("\\)", "", sod2022$Q3.25)
+sod2022$Q3.25 <- gsub("Funds identified in your grant for this purpose", "Funds identified in grant for this purpose", sod2022$Q3.25)
+sod2022$Q3.25 <- gsub("Funds identified in grant for this purpose", "Funds identified for purpose", sod2022$Q3.25)
+sod2022$Q3.25 <- gsub("General grant funds i.e. not specifically allocated to this purpose", "General grant funds", sod2022$Q3.25)
+sod2022$Q3.25 <- gsub("Your funder", "Funder", sod2022$Q3.25)
+```
+
+```{r Q3.27 Standardise responses}
+# Q3.27
+sod2022[, c(147:153)] <-
+  as.data.frame(apply(sod2022[, c(147:153)], 2,
+                      function(sod2022) {
+                        as.character(gsub(
+                          "Copyright\\/ licensing of data",
+                          "Copyright\\/Licensing of data",
+                          sod2022
+                        ))
+                      }))
+
+sod2022[, c(147:153)] <-
+  as.data.frame(apply(sod2022[, c(147:153)], 2,
+                      function(sod2022) {
+                        as.character(gsub(
+                          "Copyright\\/Licencing of data",
+                          "Copyright\\/Licensing of data",
+                          sod2022
+                        ))
+                      }))
+
+sod2022[, c(147:153)] <-
+  as.data.frame(apply(sod2022[, c(147:153)], 2,
+                      function(sod2022) {
+                        as.character(gsub(
+                          "Copyright\\/licensing of data",
+                          "Copyright\\/Licensing of data",
+                          sod2022
+                        ))
+                      }))
+
+sod2022[, c(147:153)] <-
+  as.data.frame(apply(sod2022[, c(147:153)], 2,
+                      function(sod2022) {
+                        as.character(gsub(
+                          "Copyright/Licensing of data",
+                          "Copyright/Licensing",
+                          sod2022
+                          ))
+                        }))
+
+sod2022[, c(147:153)] <-
+  as.data.frame(apply(sod2022[, c(147:153)], 2,
+                      function(sod2022) {
+                        as.character(gsub(
+                          "Copyright/Licencing of data",
+                          "Copyright/Licensing",
+                          sod2022
+                        ))
+                      }))
+
+sod2022[, c(147:153)] <-
+  as.data.frame(apply(sod2022[, c(147:153)], 2,
+                      function(sod2022) {
+                        as.character(gsub(
+                          "Copyright/licensing of data",
+                          "Copyright/Licensing",
+                          sod2022
+                        ))
+                      }))
+
+sod2022[, c(147:153)] <-
+  as.data.frame(apply(sod2022[, c(147:153)], 2,
+                      function(sod2022) {
+                        as.character(gsub(
+                          "Copyright / licensing of data",
+                          "Copyright/Licensing",
+                          sod2022
+                        ))
+                      }))
+
+sod2022[, c(147:153)] <-
+  as.data.frame(apply(sod2022[, c(147:153)], 2,
+                      function(sod2022) {
+                        as.character(gsub(
+                          "Copyright/Licensing",
+                          "Copyright/Licensing",
+                          sod2022
+                          ))
+                        }))
+
+sod2022[, c(147:153)] <-
+  as.data.frame(apply(sod2022[, c(147:153)], 2,
+                      function(sod2022) {
+                        as.character(gsub(
+                          "Creating time to manage activity",
+                          "Finding the time to manage my data",
+                          sod2022
+                        ))
+                      }))
+
+sod2022[, c(147:153)] <-
+  as.data.frame(apply(sod2022[, c(147:153)], 2,
+                      function(sod2022) {
+                        as.character(gsub(
+                          "Data management plans",
+                          "Data Management Plans",
+                          sod2022
+                          ))
+                        }))
+```
+
+```{r Q3.33 Standardise responses}
+# Q3.33
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Web search", "Web-search", sod2022))
+                                       }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("0Research", "Research", sod2022))
+                                 }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(
+                                           gsub(
+                                             "Institutional expertise",
+                                             "institutional expertise",
+                                             sod2022))
+                                       }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Research office", "	
+Research office/In-house institutional expertise", sod2022))
+                                       }))
+
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(
+                                           gsub(
+                                             " \\/ ",
+                                             "\\/",
+                                             sod2022))
+                                       }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(
+                                           gsub(
+                                             "In-house Institutional expertise Research office",
+                                             "Research office\\/In-house institutional expertise",
+                                             sod2022))
+                                       }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(
+                                           gsub(
+                                             "In-house institutional expertise",
+                                             "Research office\\/In-house institutional expertise",
+                                             sod2022))
+                                       }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("3rd-party", "third party", sod2022))
+                                 }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("3rd", "third", sod2022))
+                                 }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("party service", "party", sod2022))
+                                 }))
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Professional Professional", "Professional", sod2022))
+                                 }))
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Other \\(please specify\\)", "Other", sod2022))}))
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Institutional Library", "Library", sod2022))
+                                 }))
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("expertise 0", "expertise", sod2022))
+                                 }))
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Colleague/Supervisor", "Colleague", sod2022))
+                                 }))
+	
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Research office/Research office/In-house institutional expertise/Research office/In-house institutional expertise", "Research office/In-house institutional expertise", sod2022))
+                                 }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Research office/Research office/In-house institutional expertise", "Research office/In-house institutional expertise", sod2022))
+                                 }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("Research office/In-house institutional expertise 	Research office/Research office/In-house institutional expertise", "Research office/In-house institutional expertise", sod2022))
+                                 }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("\r?\n|\r", "", sod2022))
+                                 }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub("\r?\t|\r", "", sod2022))
+                                 }))
+
+sod2022[, c(177:187)] <- as.data.frame(apply(sod2022[, c(177:187)], 2,
+                                       function(sod2022) {
+                                         as.character(gsub(" Research office/In-house institutional expertise", "", sod2022))
+                                 }))
+
+sod2022$Q3.33_7 <-
+  sod2022$Q3.33_7[sod2022$Q3.33_7 == "00"] <- "0"
+```
+
+```{r Q3.37_3 Standardise responses}
+#Q3.37_3
+sod2022$Q3.37_3 <- gsub("Department or faculty", "Department/Faculty", sod2022$Q3.37_3)
+```

@@ -1,0 +1,1197 @@
+---
+title: "State of Open Data 2022 FAIR and CARE analysis"
+author: "Laurence Horton"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 6
+    mathjax: null
+    css: doc.css
+---
+
+```{r, child = "sod2022_descriptives.Rmd", include = FALSE}
+```
+
+**Q3.1_1 How familiar are you with the following data principles in relation to Open Data? FAIR data principles (i.e. Findable, Accessible, Interoperable and Reusable)**
+
+**Q3.1_2 How familiar are you with the following data principles in relation to Open Data? CARE principles for Indigenous Data Governance (i.e. Collective benefit, Authority to control, Responsibility and Ethics)**
+```{r FAIR and CARE familiarity}
+# Rename columns for merge
+fair_care_familiarityQ3.1_1 <-  Q3.1_1 %>%
+  rename("Response" = "Q3.1_1") %>%
+  add_column(Principle = "FAIR")
+fair_care_familiarityQ3.1_2 <- Q3.1_2 %>%
+  rename("Response" = "Q3.1_2") %>%
+  add_column(Principle = "CARE")
+
+# Merge into one dataframe
+fair_care_familiarity <- rbind(fair_care_familiarityQ3.1_1, fair_care_familiarityQ3.1_2)
+
+# Only want 2022 values
+fair_care_familiarity <- fair_care_familiarity %>%
+    filter(Survey == "2022")
+
+# Rename FAIR responses for comparison
+fair_care_familiarity$Response <-
+  recode_factor(fair_care_familiarity$Response,
+                "I have never heard of the FAIR data principles before now" = "I have never heard of the data principles before now",
+                "I am familiar with the FAIR data principles" = "I am familiar with the data principles",
+                "I have previously heard of the FAIR data principles but I am not familiar with them" = "I have previously heard of the data principles but I am not familiar with them"
+                )
+
+fair_care_familiarity$Response <-
+  factor(fair_care_familiarity$Response,
+          levels = c(
+            "I have never heard of the data principles before now",
+            "I have previously heard of the data principles but I am not familiar with them",
+            "I am familiar with the data principles"
+          ))
+
+# Viz
+ggplot(fair_care_familiarity, aes(x = Response, y = Pct * 100, fill = Principle)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,46))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 30))
+```
+```{r test FAIR and CARE familiarity}
+Q3.1_correlation <- 
+  sod2022 %>%
+  select(Survey, Q3.1_1, Q3.1_2) %>%
+  drop_na()%>%
+  filter(Survey == "2022")
+polychor(Q3.1_correlation$Q3.1_1, Q3.1_correlation$Q3.1_2)
+```
+```{r FAIR and CARE familiarity by Region}
+fair_region_familiarity_Q3.1_1 <-
+  sod2022 %>%
+  select(Survey, Q2.9_1, Q3.1_1) %>%
+    drop_na()
+
+fair_region_familiarity_Q3.1_1 <- fair_region_familiarity_Q3.1_1 %>%
+    subset(Q3.1_1 != 0 & Survey == 2022) %>%
+    group_by(Survey, Q2.9_1) %>%
+  count(Q3.1_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+fair_region_familiarity_Q3.1_1 <-  fair_region_familiarity_Q3.1_1 %>%
+  rename("Response" = "Q3.1_1",
+         "Region" = "Q2.9_1") %>%
+  add_column(Principle = "FAIR")
+
+care_region_familiarity_Q3.1_2 <-
+  sod2022 %>%
+  select(Survey, Q2.9_1, Q3.1_2) %>%
+    drop_na()
+
+care_region_familiarity_Q3.1_2 <- care_region_familiarity_Q3.1_2 %>%
+  subset(Q3.1_2 != 0 & Survey == 2022) %>%
+  group_by(Survey, Q2.9_1) %>%
+  count(Q3.1_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+care_region_familiarity_Q3.1_2 <- care_region_familiarity_Q3.1_2 %>%
+  rename("Response" = "Q3.1_2",
+         "Region" = "Q2.9_1") %>%
+  add_column(Principle = "CARE")
+
+# Merge into one dataframe
+fair_care_region <- rbind(fair_region_familiarity_Q3.1_1, care_region_familiarity_Q3.1_2)
+
+fair_care_region$Response <-
+  recode_factor(fair_care_region$Response,
+                "I have never heard of the FAIR data principles before now" = "I have never heard of the data principles before now",
+                "I am familiar with the FAIR data principles" = "I am familiar with the data principles",
+                "I have previously heard of the FAIR data principles but I am not familiar with them" = "I have previously heard of the data principles but I am not familiar with them"
+                )
+
+fair_care_region$Response <-
+  factor(fair_care_region$Response,
+          levels = c(
+            "I have never heard of the data principles before now",
+            "I have previously heard of the data principles but I am not familiar with them",
+            "I am familiar with the data principles"
+          ))
+
+# Viz
+ggplot(fair_care_region, aes(x = Region, y = Pct * 100, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  facet_wrap(vars(Principle)) +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.0) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,58))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+```
+```{r FAIR and CARE familiarity by Seniority}
+fair_seniority_familiarity_Q3.1_1 <-
+  sod2022 %>%
+  select(Survey, Q2.2, Q3.1_1) %>%
+  subset(Q3.1_1 != 0 & Survey == 2022) %>%
+    drop_na() %>%
+  rename("Response" = "Q3.1_1",
+         "Published" = "Q2.2") %>%
+  mutate(
+    Seniority = case_when(
+    Published <= 2006 ~ "Senior (pre-2007)",
+    Published >= 2007 ~ "Junior (post-2007)")
+  )
+    
+fair_seniority_familiarity_Q3.1_1 <-
+  fair_seniority_familiarity_Q3.1_1 %>%
+  group_by(Seniority, Response) %>%
+  count(Response, sort = TRUE) %>%
+  add_column(Principle = "FAIR")
+
+fair_seniority_familiarity_Q3.1_1_senior <- 
+  fair_seniority_familiarity_Q3.1_1 %>%
+  subset(Seniority == "Senior (pre-2007)") %>%
+  group_by(Seniority) %>%
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+fair_seniority_familiarity_Q3.1_1_junior <-
+    fair_seniority_familiarity_Q3.1_1 %>%
+  subset(Seniority == "Junior (post-2007)") %>%
+  group_by(Seniority) %>%
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+fair_seniority_familiarity_Q3.1_1 <- rbind(
+  fair_seniority_familiarity_Q3.1_1_senior,
+  fair_seniority_familiarity_Q3.1_1_junior
+  )
+
+rm(
+  fair_seniority_familiarity_Q3.1_1_senior,
+  fair_seniority_familiarity_Q3.1_1_junior
+  )
+
+care_seniority_familiarity_Q3.1_2 <-
+  sod2022 %>%
+  select(Survey, Q2.2, Q3.1_2) %>%
+  subset(Q3.1_2 != 0 & Survey == 2022) %>%
+    drop_na() %>%
+  rename("Response" = "Q3.1_2",
+         "Published" = "Q2.2") %>%
+  mutate(
+    Seniority = case_when(
+    Published <= 2006 ~ "Senior (pre-2007)",
+    Published >= 2007 ~ "Junior (post-2007)")
+  )
+    
+care_seniority_familiarity_Q3.1_2 <-
+  care_seniority_familiarity_Q3.1_2 %>%
+  group_by(Seniority, Response) %>%
+  count(Response, sort = TRUE) %>%
+  add_column(Principle = "CARE")
+
+care_seniority_familiarity_Q3.1_2_senior <- 
+  care_seniority_familiarity_Q3.1_2 %>%
+  subset(Seniority == "Senior (pre-2007)") %>%
+  group_by(Seniority) %>%
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+care_seniority_familiarity_Q3.1_2_junior <-
+    care_seniority_familiarity_Q3.1_2 %>%
+  subset(Seniority == "Junior (post-2007)") %>%
+  group_by(Seniority) %>%
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+care_seniority_familiarity_Q3.1_2 <- rbind(
+  care_seniority_familiarity_Q3.1_2_senior,
+  care_seniority_familiarity_Q3.1_2_junior
+  )
+
+rm(
+  care_seniority_familiarity_Q3.1_2_senior,
+  care_seniority_familiarity_Q3.1_2_junior
+  )
+# Merge into one dataframe
+fair_care_seniority <- rbind(fair_seniority_familiarity_Q3.1_1, care_seniority_familiarity_Q3.1_2)
+
+fair_care_seniority$Response <-
+  recode_factor(fair_care_seniority$Response,
+                "I have never heard of the FAIR data principles before now" = "I have never heard of the data principles before now",
+                "I am familiar with the FAIR data principles" = "I am familiar with the data principles",
+                "I have previously heard of the FAIR data principles but I am not familiar with them" = "I have previously heard of the data principles but I am not familiar with them"
+                )
+
+fair_care_seniority$Response <-
+  factor(fair_care_seniority$Response,
+          levels = c(
+            "I have never heard of the data principles before now",
+            "I have previously heard of the data principles but I am not familiar with them",
+            "I am familiar with the data principles"
+          ))
+
+fair_care_seniority$Seniority <-
+  factor(fair_care_seniority$Seniority,
+          levels = c(
+            "Junior (post-2007)",
+            "Senior (pre-2007)"
+          ))
+
+# Viz
+ggplot(fair_care_seniority, aes(x = Seniority, y = Pct, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  facet_wrap(vars(Principle)) +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.0) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,.54))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+```
+```{r test FAIR and CARE familiarity Seniority}
+#FAIR
+Q3.1_1_Q2.2_correlation <- 
+  sod2022 %>%
+  select(Survey, Q3.1_1, Q2.2) %>%
+  drop_na()%>%
+  filter(Survey == "2022") %>%
+    mutate(
+    Q2.2 = case_when(
+    Q2.2 <= 2006 ~ "Senior (pre-2007)",
+    Q2.2 >= 2007 ~ "Junior (post-2007)")
+  )
+polychor(Q3.1_1_Q2.2_correlation$Q3.1_1, Q3.1_1_Q2.2_correlation$Q2.2)
+
+#CARE
+Q3.1_2_Q2.2_correlation <- 
+  sod2022 %>%
+  select(Survey, Q3.1_2, Q2.2) %>%
+  drop_na()%>%
+  filter(Survey == "2022") %>%
+    mutate(
+    Q2.2 = case_when(
+    Q2.2 <= 2006 ~ "Senior (pre-2007)",
+    Q2.2 >= 2007 ~ "Junior (post-2007)")
+  )
+polychor(Q3.1_2_Q2.2_correlation$Q3.1_2, Q3.1_2_Q2.2_correlation$Q2.2)
+```
+```{r FAIR and CARE familiarity by primary area of interest}
+fair_interest_familiarity_Q3.1_1 <-
+  sod2022 %>%
+  select(Survey, Q2.7, Q3.1_1) %>%
+    drop_na()
+
+fair_interest_familiarity_Q3.1_1 <- fair_interest_familiarity_Q3.1_1 %>%
+    subset(Q3.1_1 != 0 & Survey == 2022) %>%
+    group_by(Survey, Q2.7) %>%
+  count(Q3.1_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+fair_interest_familiarity_Q3.1_1 <-  fair_interest_familiarity_Q3.1_1 %>%
+  rename("Response" = "Q3.1_1",
+         "Interest" = "Q2.7") %>%
+  add_column(Principle = "FAIR")
+
+care_interest_familiarity_Q3.1_2 <-
+  sod2022 %>%
+  select(Survey, Q2.7, Q3.1_2) %>%
+    drop_na()
+
+care_interest_familiarity_Q3.1_2 <- care_interest_familiarity_Q3.1_2 %>%
+  subset(Q3.1_2 != 0 & Survey == 2022) %>%
+  group_by(Survey, Q2.7) %>%
+  count(Q3.1_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+care_interest_familiarity_Q3.1_2 <- care_interest_familiarity_Q3.1_2 %>%
+  rename("Response" = "Q3.1_2",
+         "Interest" = "Q2.7") %>%
+  add_column(Principle = "CARE")
+
+# Merge into one dataframe
+fair_care_interest <- rbind(fair_interest_familiarity_Q3.1_1, care_interest_familiarity_Q3.1_2)
+
+fair_care_interest$Response <-
+  recode_factor(fair_care_interest$Response,
+                "I have never heard of the FAIR data principles before now" = "I have never heard of the data principles before now",
+                "I am familiar with the FAIR data principles" = "I am familiar with the data principles",
+                "I have previously heard of the FAIR data principles but I am not familiar with them" = "I have previously heard of the data principles but I am not familiar with them"
+                )
+
+fair_care_interest$Response <-
+  factor(fair_care_interest$Response,
+          levels = c(
+            "I have never heard of the data principles before now",
+            "I have previously heard of the data principles but I am not familiar with them",
+            "I am familiar with the data principles"
+          ))
+
+# Viz CARE
+fair_care_interest %>%
+  subset(Principle == "CARE") %>%
+  ggplot(aes(x = Interest, y = Pct * 100, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.0) +
+  labs(
+    x = NULL,
+    y = NULL,
+    title = "CARE",
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,56))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 4)) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+
+#Viz FAIR
+fair_care_interest %>%
+  subset(Principle == "FAIR") %>%
+  ggplot(aes(x = Interest, y = Pct * 100, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.0) +
+  labs(
+    x = NULL,
+    y = NULL,
+    title = "FAIR",
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,56))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 4)) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+```
+
+**Q3.21 To what extent do you think you make your data open in compliance with: [Note: by open we mean free to access, reuse, repurpose and redistribute]**
+
+**Q3.21_1 FAIR data principles (i.e. Findable, Accessible, Interoperable and Reusable)**
+```{r FAIR and CARE compliance}
+# Rename columns for merge
+fair_care_complianceQ3.21_1 <-  Q3.21_1 %>%
+  rename("Response" = "Q3.21_1") %>%
+  add_column(Principle = "FAIR")
+fair_care_complianceQ3.21_2 <- Q3.21_2 %>%
+  rename("Response" = "Q3.21_2") %>%
+  add_column(Principle = "CARE")
+
+# Merge into one dataframe
+fair_care_compliance <- rbind(fair_care_complianceQ3.21_1, fair_care_complianceQ3.21_2)
+
+# Only want 2022 values
+fair_care_compliance <- fair_care_compliance %>%
+    filter(Survey == "2022")
+
+fair_care_compliance$Response <-
+  factor(fair_care_compliance$Response,
+          levels = c(
+            "Entirely",
+            "Somewhat",
+            "Not at all",
+            "I am not aware of these principles"
+          ))
+
+# Viz
+ggplot(fair_care_compliance, aes(x = Response, y = Pct * 100, fill = Principle)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,49))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 30))
+```
+```{r FAIR and CARE compliance by Region}
+fair_region_compliance_Q3.21_1 <-
+  sod2022 %>%
+  select(Survey, Q2.9_1, Q3.21_1) %>%
+    drop_na()
+
+fair_region_compliance_Q3.21_1 <- fair_region_compliance_Q3.21_1 %>%
+    subset(Q3.21_1 != 0 & Survey == 2022) %>%
+    group_by(Survey, Q2.9_1) %>%
+  count(Q3.21_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+fair_region_compliance_Q3.21_1 <-  fair_region_compliance_Q3.21_1 %>%
+  rename("Response" = "Q3.21_1",
+         "Region" = "Q2.9_1") %>%
+  add_column(Principle = "FAIR")
+
+care_region_compliance_Q3.21_2 <-
+  sod2022 %>%
+  select(Survey, Q2.9_1, Q3.21_2) %>%
+    drop_na()
+
+care_region_compliance_Q3.21_2 <- care_region_compliance_Q3.21_2 %>%
+  subset(Q3.21_2 != 0 & Survey == 2022) %>%
+  group_by(Survey, Q2.9_1) %>%
+  count(Q3.21_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+care_region_compliance_Q3.21_2 <- care_region_compliance_Q3.21_2 %>%
+  rename("Response" = "Q3.21_2",
+         "Region" = "Q2.9_1") %>%
+  add_column(Principle = "CARE")
+
+# Merge into one dataframe
+fair_care_compliance_region <- rbind(fair_region_compliance_Q3.21_1, care_region_compliance_Q3.21_2)
+
+
+fair_care_compliance_region$Response <-
+  factor(fair_care_compliance_region$Response,
+         levels = c(
+            "Entirely",
+            "Somewhat",
+            "Not at all",
+            "I am not aware of these principles"
+          ))
+
+# Viz
+ggplot(fair_care_compliance_region, aes(x = Region, y = Pct * 100, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  facet_wrap(vars(Principle)) +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.0) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,58))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
+```{r FAIR and CARE compliance by Seniority}
+fair_seniority_compliance_Q3.21_1 <-
+  sod2022 %>%
+  select(Survey, Q2.2, Q3.21_1) %>%
+  subset(Q3.21_1 != 0 & Survey == 2022) %>%
+    drop_na() %>%
+  rename("Response" = "Q3.21_1",
+         "Published" = "Q2.2") %>%
+  mutate(
+    Seniority = case_when(
+    Published <= 2006 ~ "Senior (pre-2007)",
+    Published >= 2007 ~ "Junior (post-2007)")
+  )
+    
+fair_seniority_compliance_Q3.21_1 <-
+  fair_seniority_compliance_Q3.21_1 %>%
+  group_by(Seniority, Response) %>%
+  count(Response, sort = TRUE) %>%
+  add_column(Principle = "FAIR")
+
+fair_seniority_compliance_Q3.21_1_senior <- 
+  fair_seniority_compliance_Q3.21_1 %>%
+  subset(Seniority == "Senior (pre-2007)") %>%
+  group_by(Seniority) %>%
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+fair_seniority_compliance_Q3.21_1_junior <-
+    fair_seniority_compliance_Q3.21_1 %>%
+  subset(Seniority == "Junior (post-2007)") %>%
+  group_by(Seniority) %>%
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+fair_seniority_compliance_Q3.21_1 <- rbind(
+  fair_seniority_compliance_Q3.21_1_senior,
+  fair_seniority_compliance_Q3.21_1_junior
+  )
+
+rm(
+  fair_seniority_compliance_Q3.21_1_senior,
+  fair_seniority_compliance_Q3.21_1_junior
+  )
+
+care_seniority_compliance_Q3.21_2 <-
+  sod2022 %>%
+  select(Survey, Q2.2, Q3.21_2) %>%
+  subset(Q3.21_2 != 0 & Survey == 2022) %>%
+    drop_na() %>%
+  rename("Response" = "Q3.21_2",
+         "Published" = "Q2.2") %>%
+  mutate(
+    Seniority = case_when(
+    Published <= 2006 ~ "Senior (pre-2007)",
+    Published >= 2007 ~ "Junior (post-2007)")
+  )
+    
+care_seniority_compliance_Q3.21_2 <-
+  care_seniority_compliance_Q3.21_2 %>%
+  group_by(Seniority, Response) %>%
+  count(Response, sort = TRUE) %>%
+  add_column(Principle = "CARE")
+
+care_seniority_compliance_Q3.21_2_senior <- 
+  care_seniority_compliance_Q3.21_2 %>%
+  subset(Seniority == "Senior (pre-2007)") %>%
+  group_by(Seniority) %>%
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+care_seniority_compliance_Q3.21_2_junior <-
+    care_seniority_compliance_Q3.21_2 %>%
+  subset(Seniority == "Junior (post-2007)") %>%
+  group_by(Seniority) %>%
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+care_seniority_compliance_Q3.21_2 <- rbind(
+  care_seniority_compliance_Q3.21_2_senior,
+  care_seniority_compliance_Q3.21_2_junior
+  )
+
+rm(
+  care_seniority_compliance_Q3.21_2_senior,
+  care_seniority_compliance_Q3.21_2_junior
+  )
+# Merge into one dataframe
+fair_care_compliance_seniority <- rbind(fair_seniority_compliance_Q3.21_1, care_seniority_compliance_Q3.21_2)
+
+fair_care_compliance_seniority$Response <-
+  factor(fair_care_compliance_seniority$Response,
+         levels = c(
+            "Entirely",
+            "Somewhat",
+            "Not at all",
+            "I am not aware of these principles"
+          ))
+
+fair_care_compliance_seniority$Seniority <-
+  factor(fair_care_compliance_seniority$Seniority,
+          levels = c(
+            "Junior (post-2007)",
+            "Senior (pre-2007)"
+          ))
+
+# Viz
+ggplot(fair_care_compliance_seniority, aes(x = Seniority, y = Pct, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  facet_wrap(vars(Principle)) +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.0) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,.54))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
+```{r FAIR and CARE compliance by primary area of interest}
+fair_interest_compliance_Q3.21_1 <-
+  sod2022 %>%
+  select(Survey, Q2.7, Q3.21_1) %>%
+    drop_na()
+
+fair_interest_compliance_Q3.21_1 <- fair_interest_compliance_Q3.21_1 %>%
+    subset(Q3.21_1 != 0 & Survey == 2022) %>%
+    group_by(Survey, Q2.7) %>%
+  count(Q3.21_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+fair_interest_compliance_Q3.21_1 <-  fair_interest_compliance_Q3.21_1 %>%
+  rename("Response" = "Q3.21_1",
+         "Interest" = "Q2.7") %>%
+  add_column(Principle = "FAIR")
+
+care_interest_compliance_Q3.21_2 <-
+  sod2022 %>%
+  select(Survey, Q2.7, Q3.21_2) %>%
+    drop_na()
+
+care_interest_compliance_Q3.21_2 <- care_interest_compliance_Q3.21_2 %>%
+  subset(Q3.21_2 != 0 & Survey == 2022) %>%
+  group_by(Survey, Q2.7) %>%
+  count(Q3.21_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+care_interest_compliance_Q3.21_2 <- care_interest_compliance_Q3.21_2 %>%
+  rename("Response" = "Q3.21_2",
+         "Interest" = "Q2.7") %>%
+  add_column(Principle = "CARE")
+
+# Merge into one dataframe
+fair_care_compliance_interest <- rbind(fair_interest_compliance_Q3.21_1, care_interest_compliance_Q3.21_2)
+
+fair_care_compliance_interest$Response <-
+  factor(fair_care_compliance_interest$Response,
+         levels = c(
+            "Entirely",
+            "Somewhat",
+            "Not at all",
+            "I am not aware of these principles"
+          ))
+
+# Viz CARE
+fair_care_compliance_interest %>%
+  subset(Principle == "CARE") %>%
+  ggplot(aes(x = Interest, y = Pct * 100, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.0) +
+  labs(
+    x = NULL,
+    y = NULL,
+    title = "CARE",
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,50))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 4))
+
+#Viz FAIR
+fair_care_compliance_interest %>%
+  subset(Principle == "FAIR") %>%
+  ggplot(aes(x = Interest, y = Pct * 100, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.0) +
+  labs(
+    x = NULL,
+    y = NULL,
+    title = "FAIR",
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,65))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 4))
+```
+
+**Q3.22 To what extent do you think researchers in your field more generally make their data open in compliance with: [Note: by open we mean free to access, reuse, repurpose and redistribute]**
+
+**Q3.22_1 FAIR data principles (i.e. Findable, Accessible, Interoperable and Reusable)**
+**Q3.22_2 CARE principles for Indigenous Data Governance (i.e. Collective benefit, Authority to control, Responsibility and Ethics)**
+```{r FAIR and CARE others}
+# Rename columns for merge
+fair_care_othersQ3.22_1 <-  Q3.22_1 %>%
+  rename("Response" = "Q3.22_1") %>%
+  add_column(Principle = "FAIR")
+fair_care_othersQ3.22_2 <- Q3.22_2 %>%
+  rename("Response" = "Q3.22_2") %>%
+  add_column(Principle = "CARE")
+
+# Merge into one dataframe
+fair_care_others <- rbind(fair_care_othersQ3.22_1, fair_care_othersQ3.22_2)
+
+# Only want 2022 values
+fair_care_others <- fair_care_others %>%
+    filter(Survey == "2022")
+
+fair_care_others$Response <-
+  factor(fair_care_others$Response,
+          levels = c(
+            "Entirely",
+            "Somewhat",
+            "Not at all",
+            "I am not aware of these principles"
+          ))
+
+# Viz
+ggplot(fair_care_others, aes(x = Response, y = Pct * 100, fill = Principle)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,55))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 30))
+```
+```{r FAIR and CARE others by Region}
+fair_region_others_Q3.22_1 <-
+  sod2022 %>%
+  select(Survey, Q2.9_1, Q3.22_1) %>%
+    drop_na()
+
+fair_region_others_Q3.22_1 <- fair_region_others_Q3.22_1 %>%
+    subset(Q3.22_1 != 0 & Survey == 2022) %>%
+    group_by(Survey, Q2.9_1) %>%
+  count(Q3.22_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+fair_region_others_Q3.22_1 <-  fair_region_others_Q3.22_1 %>%
+  rename("Response" = "Q3.22_1",
+         "Region" = "Q2.9_1") %>%
+  add_column(Principle = "FAIR")
+
+care_region_others_Q3.22_2 <-
+  sod2022 %>%
+  select(Survey, Q2.9_1, Q3.22_2) %>%
+    drop_na()
+
+care_region_others_Q3.22_2 <- care_region_others_Q3.22_2 %>%
+  subset(Q3.22_2 != 0 & Survey == 2022) %>%
+  group_by(Survey, Q2.9_1) %>%
+  count(Q3.22_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+care_region_others_Q3.22_2 <- care_region_others_Q3.22_2 %>%
+  rename("Response" = "Q3.22_2",
+         "Region" = "Q2.9_1") %>%
+  add_column(Principle = "CARE")
+
+# Merge into one dataframe
+fair_care_others_region <- rbind(fair_region_others_Q3.22_1, care_region_others_Q3.22_2)
+
+
+fair_care_others_region$Response <-
+  factor(fair_care_others_region$Response,
+         levels = c(
+            "Entirely",
+            "Somewhat",
+            "Not at all",
+            "I am not aware of these principles"
+          ))
+
+# Viz
+ggplot(fair_care_others_region, aes(x = Region, y = Pct * 100, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  facet_wrap(vars(Principle)) +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.0) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,58))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
+```{r FAIR and CARE others by Seniority}
+fair_seniority_others_Q3.22_1 <-
+  sod2022 %>%
+  select(Survey, Q2.2, Q3.22_1) %>%
+  subset(Q3.22_1 != 0 & Survey == 2022) %>%
+    drop_na() %>%
+  rename("Response" = "Q3.22_1",
+         "Published" = "Q2.2") %>%
+  mutate(
+    Seniority = case_when(
+    Published <= 2006 ~ "Senior (pre-2007)",
+    Published >= 2007 ~ "Junior (post-2007)")
+  )
+    
+fair_seniority_others_Q3.22_1 <-
+  fair_seniority_others_Q3.22_1 %>%
+  group_by(Seniority, Response) %>%
+  count(Response, sort = TRUE) %>%
+  add_column(Principle = "FAIR")
+
+fair_seniority_others_Q3.22_1_senior <- 
+  fair_seniority_others_Q3.22_1 %>%
+  subset(Seniority == "Senior (pre-2007)") %>%
+  group_by(Seniority) %>%
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+fair_seniority_others_Q3.22_1_junior <-
+    fair_seniority_others_Q3.22_1 %>%
+  subset(Seniority == "Junior (post-2007)") %>%
+  group_by(Seniority) %>%
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+fair_seniority_others_Q3.22_1 <- rbind(
+  fair_seniority_others_Q3.22_1_senior,
+  fair_seniority_others_Q3.22_1_junior
+  )
+
+rm(
+  fair_seniority_others_Q3.22_1_senior,
+  fair_seniority_others_Q3.22_1_junior
+  )
+
+care_seniority_others_Q3.22_2 <-
+  sod2022 %>%
+  select(Survey, Q2.2, Q3.22_2) %>%
+  subset(Q3.22_2 != 0 & Survey == 2022) %>%
+    drop_na() %>%
+  rename("Response" = "Q3.22_2",
+         "Published" = "Q2.2") %>%
+  mutate(
+    Seniority = case_when(
+    Published <= 2006 ~ "Senior (pre-2007)",
+    Published >= 2007 ~ "Junior (post-2007)")
+  )
+    
+care_seniority_others_Q3.22_2 <-
+  care_seniority_others_Q3.22_2 %>%
+  group_by(Seniority, Response) %>%
+  count(Response, sort = TRUE) %>%
+  add_column(Principle = "CARE")
+
+care_seniority_others_Q3.22_2_senior <- 
+  care_seniority_others_Q3.22_2 %>%
+  subset(Seniority == "Senior (pre-2007)") %>%
+  group_by(Seniority) %>%
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+care_seniority_others_Q3.22_2_junior <-
+    care_seniority_others_Q3.22_2 %>%
+  subset(Seniority == "Junior (post-2007)") %>%
+  group_by(Seniority) %>%
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+care_seniority_others_Q3.22_2 <- rbind(
+  care_seniority_others_Q3.22_2_senior,
+  care_seniority_others_Q3.22_2_junior
+  )
+
+rm(
+  care_seniority_others_Q3.22_2_senior,
+  care_seniority_others_Q3.22_2_junior
+  )
+# Merge into one dataframe
+fair_care_others_seniority <- rbind(fair_seniority_others_Q3.22_1, care_seniority_others_Q3.22_2)
+
+fair_care_others_seniority$Response <-
+  factor(fair_care_others_seniority$Response,
+         levels = c(
+            "Entirely",
+            "Somewhat",
+            "Not at all",
+            "I am not aware of these principles"
+          ))
+
+fair_care_others_seniority$Seniority <-
+  factor(fair_care_others_seniority$Seniority,
+          levels = c(
+            "Junior (post-2007)",
+            "Senior (pre-2007)"
+          ))
+
+# Viz
+ggplot(fair_care_others_seniority, aes(x = Seniority, y = Pct, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  facet_wrap(vars(Principle)) +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.0) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,.54))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
+```{r FAIR and CARE others by primary area of interest}
+fair_interest_others_Q3.22_1 <-
+  sod2022 %>%
+  select(Survey, Q2.7, Q3.22_1) %>%
+    drop_na()
+
+fair_interest_others_Q3.22_1 <- fair_interest_others_Q3.22_1 %>%
+    subset(Q3.22_1 != 0 & Survey == 2022) %>%
+    group_by(Survey, Q2.7) %>%
+  count(Q3.22_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+fair_interest_others_Q3.22_1 <-  fair_interest_others_Q3.22_1 %>%
+  rename("Response" = "Q3.22_1",
+         "Interest" = "Q2.7") %>%
+  add_column(Principle = "FAIR")
+
+care_interest_others_Q3.22_2 <-
+  sod2022 %>%
+  select(Survey, Q2.7, Q3.22_2) %>%
+    drop_na()
+
+care_interest_others_Q3.22_2 <- care_interest_others_Q3.22_2 %>%
+  subset(Q3.22_2 != 0 & Survey == 2022) %>%
+  group_by(Survey, Q2.7) %>%
+  count(Q3.22_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+care_interest_others_Q3.22_2 <- care_interest_others_Q3.22_2 %>%
+  rename("Response" = "Q3.22_2",
+         "Interest" = "Q2.7") %>%
+  add_column(Principle = "CARE")
+
+# Merge into one dataframe
+fair_care_others_interest <- rbind(fair_interest_others_Q3.22_1, care_interest_others_Q3.22_2)
+
+fair_care_others_interest$Response <-
+  factor(fair_care_others_interest$Response,
+         levels = c(
+            "Entirely",
+            "Somewhat",
+            "Not at all",
+            "I am not aware of these principles"
+          ))
+
+# Viz CARE
+fair_care_others_interest %>%
+  subset(Principle == "CARE") %>%
+  ggplot(aes(x = Interest, y = Pct * 100, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.0) +
+  labs(
+    x = NULL,
+    y = NULL,
+    title = "CARE",
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,56))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 4))
+
+#Viz FAIR
+fair_care_others_interest %>%
+  subset(Principle == "FAIR") %>%
+  ggplot(aes(x = Interest, y = Pct * 100, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.0) +
+  labs(
+    x = NULL,
+    y = NULL,
+    title = "FAIR",
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,65))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 4))
+```
+```{r FAIR compare others and compliance}
+# Rename columns for merge
+fair_compliance_othersQ3.21_1 <-  Q3.21_1 %>%
+  rename("Response" = "Q3.21_1") %>%
+  add_column(Principle = "Practice")
+fair_compliance_othersQ3.22_1 <- Q3.22_1 %>%
+  rename("Response" = "Q3.22_1") %>%
+  add_column(Principle = "Perception")
+
+# Merge into one dataframe
+fair_compliance_others <- rbind(fair_compliance_othersQ3.21_1, fair_compliance_othersQ3.22_1)
+
+# Only want 2022 values
+fair_compliance_others <- fair_compliance_others %>%
+    filter(Survey == "2022")
+
+fair_compliance_others$Response <-
+  factor(fair_compliance_others$Response,
+          levels = c(
+            "Entirely",
+            "Somewhat",
+            "Not at all",
+            "I am not aware of these principles"
+          ))
+
+# Viz
+ggplot(fair_compliance_others, aes(x = Response, y = Pct * 100, fill = Principle)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+    geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,52))  +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 30))
+```
+```{r FAIR compare others and compliance by discipline}
+a <- as_tibble(fair_care_compliance_interest) 
+a <- a %>%
+  filter(Principle == "FAIR") %>%
+  select(-c(Survey, Principle,
+            n)) %>%
+  rename(Pct_Practice = Pct) %>%
+  add_row(Interest = "Astronomy and planetary science", Response = "Not at all", Pct_Practice = 0)
+
+b <- as_tibble(fair_care_others_interest)
+b <- b %>%
+  filter(Principle == "FAIR") %>%
+  select(-c(Survey, Principle,
+            n)) %>%
+  rename(Pct_Perception = Pct)
+
+ab <- merge(a, b, by = c("Interest", "Response"))
+ab <- ab %>%
+  mutate(Difference = Pct_Practice - Pct_Perception)
+ab
+
+# Viz
+ggplot(ab, aes(x = Interest, y = Difference * 100, fill = Response)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+  ) +
+scale_x_discrete(labels = function(x) str_wrap(x, width = 4))
+```

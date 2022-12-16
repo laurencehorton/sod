@@ -1,0 +1,5455 @@
+---
+title: "State of Open Data 2022 Descriptives"
+author: "Laurence Horton"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 6
+    mathjax: null
+    css: doc.css
+---
+
+```{r, child = "sod2022_cleaning.Rmd", include = FALSE}
+```
+
+### Professional background
+**Q2.1 To provide a little more context for your later responses we would first like to understand a little about your research and attitudes towards open science.**
+
+**Q2.2 About you: In which year was your first peer-reviewed research article published?**
+```{r Q2.2}
+Q2.2 <-
+  sod2022 %>% count(Q2.2, sort = TRUE) %>%
+  subset(Q2.2 > 0) %>%
+  mutate(Pct = round(n / sum(n), 3)) # drops year values of 0
+
+kable(Q2.2)
+```
+```{r Q2.2 visualisations}
+ggplot(Q2.2) +
+  geom_col(aes(x = Q2.2, y = n)) +
+  labs(
+    x = "Year",
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+  )
+```
+
+**Q2.3 When was the last occasion that you published or submitted a manuscript to a journal?**
+```{r Q2.3}
+Q2.3 <-
+  sod2022 %>%
+  select(Survey, Q2.3) %>%
+    drop_na()
+
+Q2.3 <- Q2.3 %>%
+    group_by(Survey) %>%
+  count(Q2.3, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+kable(Q2.3)
+
+Q2.3$Q2.3 <-
+  factor(Q2.3$Q2.3,
+          levels = c(
+            "I have never submitted a manuscript to a journal",
+            "More than 5 years ago",
+            "3-5 years ago",
+            "1-2 years ago",
+            "Within the last year"
+          ))
+```
+```{r Q2.3 visualisations}
+ggplot(Q2.3, aes(x=Survey, y=Pct, fill=Q2.3)) +
+  geom_col() +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE)) +
+  coord_flip()
+
+ggplot(Q2.3, aes(x=(Survey), y = n, fill = Q2.3)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 3) +  
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  scale_y_continuous(limits = c(0,5500)) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+
+
+ggplot(Q2.3, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q2.3)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+    ) +
+  guides(color=guide_legend(nrow = 3, byrow=TRUE))
+```
+
+**Q2.4 Which type of organisation do you work in?**
+```{r Q2.4}
+Q2.4 <-
+  sod2022 %>%
+  select(Survey, Q2.4) %>%
+    drop_na()
+
+Q2.4 <- Q2.4 %>%
+    group_by(Survey) %>%
+  count(Q2.4, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+kable(Q2.4)
+```
+```{r Q2.4 visualisations}
+ggplot(Q2.4, aes(x=Survey, y=Pct, fill=Q2.4)) +
+  geom_col() +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  guides(fill=guide_legend(nrow3= 3, byrow=TRUE)) +
+  coord_flip()
+
+ggplot(Q2.4, aes(x=(Survey), y = n, fill = Q2.4)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 3) +  
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  scale_y_continuous(limits = c(0,5500)) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+
+
+ggplot(Q2.4, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q2.4)) +
+  scale_x_continuous(breaks = 2016:2022) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+    ) +
+  guides(color=guide_legend(nrow = 3, byrow=TRUE))
+```
+
+**Q2.6 Which of the following job titles best applies to you?**
+```{r Q2.6}
+Q2.6 <-
+  sod2022 %>%
+  select(Survey, Q2.6) %>%
+    drop_na()
+
+Q2.6 <- Q2.6 %>%
+    group_by(Survey) %>%
+  count(Q2.6, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+kable(Q2.6)
+```
+```{r Q2.6 visualisations}
+ggplot(Q2.6, aes(x=reorder(Q2.6, n), y=Pct)) +
+  geom_col() +
+  geom_text(aes(label = paste0(n," ","(",round(Pct * 100),"%",")")),
+    hjust = -0.2,
+    size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022"
+    ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  scale_y_continuous(limits = c(0,.27))
+```
+
+**Q2.7 Which of the following best describes your primary area of interest?**
+```{r Q2.7}
+Q2.7 <-
+  sod2022 %>%
+  select(Survey, Q2.7) %>%
+    drop_na()
+
+Q2.7 <- Q2.7 %>%
+  subset(Q2.7 != 0) %>%
+    group_by(Survey) %>%
+  count(Q2.7, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+kable(Q2.7)
+```
+```{r Q2.7 visualisations}
+ggplot(Q2.7, aes(x = factor(Survey), y = Pct * 100, fill = Q2.7)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  labs(
+    x = NULL,
+    y = "Percentage",
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+ theme_classic() +
+  theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+ggplot(Q2.7, aes(x = factor(Survey), y = n, fill = Q2.7)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  labs(
+    x = NULL,
+    y = "Number",
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+ theme_classic() +
+  theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+ggplot(Q2.7, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q2.7)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+    ) +
+  guides(color=guide_legend(nrow = 3, byrow=TRUE))
+```
+
+**Q2.9 Which country/ territory are you located in?**
+```{r Q2.9}
+Q2.9 <-
+  sod2022 %>%
+  select(Survey, Q2.9) %>%
+    drop_na()
+
+# Keep only valid responses
+Q2.9 <- Q2.9 %>%
+  subset(Q2.9 != 0) %>%
+    group_by(Survey) %>%
+  count(Q2.9, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q2.9)
+```
+
+**Q2.9_1 Which continent are you located in?**
+```{r Q2.9_1}
+Q2.9_1 <-
+  sod2022 %>%
+  select(Survey, Q2.9_1) %>%
+    drop_na()
+
+# Keep only valid responses
+Q2.9_1 <- Q2.9_1 %>%
+  subset(Q2.9_1 != 0) %>%
+    group_by(Survey) %>%
+  count(Q2.9_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3)) # Rename column
+
+kable(Q2.9_1)
+
+Q2.9_1$Q2.9_1 <-
+  recode_factor(
+    Q2.9_1$Q2.9_1,
+    "Asia (including Middle East)" = "Asia",
+    "North America (including Central America and the Carribean)" = "North America"
+    )
+```
+```{r Q2.9_1 visualisations}
+ggplot(Q2.9_1, aes(x= factor(Survey), y = Pct, fill = Q2.9_1)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.45))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q2.9_1, aes(x= factor(Survey), y = n, fill = Q2.9_1)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2500))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q2.9_1, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q2.9_1)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+## Attitudes to Open Science
+
+**Q2.11 To what extent do you agree/disagree with the following statements?**
+
+**Q2.11_1 Making research articles open access should be common scholarly practice**
+```{r Q2.11_1}
+# Keep only valid responses
+Q2.11_1 <- sod2022 %>%
+  select(Survey, Q2.11_1) %>%
+  drop_na() %>% 
+  subset(Q2.11_1 != 0) %>%
+  group_by(Survey) %>%
+  count(Q2.11_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+Q2.11_1$Q2.11_1 <- factor(Q2.11_1$Q2.11_1, levels = c("I am unaware of this practice", "Strongly disagree", "Somewhat disagree", "Neutral", "Somewhat agree", "Strongly agree"))
+
+kable(Q2.11_1)
+```
+```{r Q2.11_1 visualisations}
+ggplot(Q2.11_1, aes(x = factor(Survey), y = Pct * 100, fill = Q2.11_1)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 3) +  
+  scale_y_continuous(limits = c(0,71))  +
+  labs(
+    x = NULL,
+    y = "Percentage",
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+ theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+ggplot(Q2.11_1, aes(x = factor(Survey), y = n, fill = Q2.11_1)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 3) +  
+  scale_y_continuous(limits = c(0,4200))  +
+  labs(
+    x = NULL,
+    y = "Number",
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+ theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+ggplot(Q2.11_1, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q2.11_1)) +
+  xlab("") + ylab("Percentage") +
+  scale_x_continuous(breaks = 2022:2022) +
+  scale_color_discrete(name="") +
+  labs(
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+    ) +
+  guides(color=guide_legend(nrow = 2, byrow=TRUE))
+```
+
+**Q2.11_2 Making research data openly available should be common scholarly practice (2)**
+```{r Q2.11_2}
+# Keep only valid responses
+Q2.11_2 <- sod2022 %>%
+  select(Survey, Q2.11_2) %>%
+  drop_na() %>% 
+  subset(Q2.11_2 != 0) %>%
+  group_by(Survey) %>%
+  count(Q2.11_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+Q2.11_2$Q2.11_2 <- factor(Q2.11_2$Q2.11_2, levels = c("I am unaware of this practice", "Strongly disagree", "Somewhat disagree", "Neutral", "Somewhat agree", "Strongly agree"))
+
+kable(Q2.11_2)
+```
+```{r Q2.11_2 visualisations}
+ggplot(Q2.11_2, aes(x = factor(Survey), y = Pct * 100, fill = Q2.11_2)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 3) +  
+  scale_y_continuous(limits = c(0,60))  +
+  labs(
+    x = NULL,
+    y = "Percentage",
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+ theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+ggplot(Q2.11_2, aes(x = factor(Survey), y = n, fill = Q2.11_2)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 3) +  
+  scale_y_continuous(limits = c(0,3400))  +
+  labs(
+    x = NULL,
+    y = "Number",
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+ theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+ggplot(Q2.11_2, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q2.11_2)) +
+  xlab("") + ylab("Percentage") +
+  scale_x_continuous(breaks = 2021:2022) +
+  scale_color_discrete(name="") +
+    labs(
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+    ) +
+  guides(color=guide_legend(nrow = 2, byrow=TRUE))
+```
+
+**Q2.11_3 Making peer review open should be common scholarly practice** 
+```{r Q2.11_3}
+# Keep only valid responses
+Q2.11_3 <- sod2022 %>%
+  select(Survey, Q2.11_3) %>%
+  drop_na() %>% 
+  subset(Q2.11_3 != 0) %>%
+  group_by(Survey) %>%
+  count(Q2.11_3, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+Q2.11_3$Q2.11_3 <- factor(Q2.11_3$Q2.11_3, levels = c("I am unaware of this practice", "Strongly disagree", "Somewhat disagree", "Neutral / No opinion", "Somewhat agree", "Strongly agree"))
+
+kable(Q2.11_3)
+```
+```{r Q2.11_3 visualisations}
+ggplot(Q2.11_3, aes(x = factor(Q2.11_3), y = n)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_text(aes(label = paste0(n," ","(",round(Pct * 100),"%",")")),
+    hjust = -0.2,
+    size = 3) +
+  scale_y_continuous(limits = c(0,3000))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+ theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+  ) +
+  coord_flip()
+```
+
+**Q2.11_4 Preprinting should be common scholarly practice**
+```{r Q2.11_4}
+# Keep only valid responses
+Q2.11_4 <- sod2022 %>%
+  select(Survey, Q2.11_4) %>%
+  drop_na() %>% 
+  subset(Q2.11_4 != 0) %>%
+    group_by(Survey) %>%
+  count(Q2.11_4, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+Q2.11_4$Q2.11_4 <- factor(Q2.11_4$Q2.11_4, levels = c("I am unaware of this practice", "Strongly disagree", "Somewhat disagree", "Neutral", "Somewhat agree", "Strongly agree"))
+
+kable(Q2.11_4)
+```
+```{r Q2.11_4 visualisations}
+ggplot(Q2.11_4, aes(x = factor(Q2.11_4), y = n)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_text(aes(label = paste0(n," ","(",round(Pct * 100),"%",")")),
+    hjust = -0.2,
+    size = 3) +
+  scale_y_continuous(limits = c(0,2250))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+ theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+    ) +
+  coord_flip()
+```
+
+## Awareness of Open Data principles
+
+**Q3.1_1 How familiar are you with the following data principles in relation to Open Data? FAIR data principles (i.e. Findable, Accessible, Interoperable and Reusable)**
+```{r Q3.1_1}
+Q3.1_1 <-
+  sod2022 %>%
+  select(Survey, Q3.1_1) %>%
+    drop_na()
+
+Q3.1_1 <- Q3.1_1 %>%
+    subset(Q3.1_1 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.1_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+Q3.1_1$Q3.1_1 <-
+  factor(Q3.1_1$Q3.1_1,
+          levels = c(
+            "I have never heard of the FAIR data principles before now",
+            "I have previously heard of the FAIR data principles but I am not familiar with them",
+            "I am familiar with the FAIR data principles"
+          ))
+
+kable(Q3.1_1)
+```
+```{r Q3.1_1 visualisations}
+ggplot(Q3.1_1, aes(x=Survey, y=Pct, fill=Q3.1_1)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+
+ggplot(Q3.1_1, aes(x= factor(Survey), y = n, fill = Q3.1_1)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,3500))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    ) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+
+ggplot(Q3.1_1, aes( x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.1_1)) +
+  xlab("") + ylab("Percentage") +
+    labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+) +
+  guides(color=guide_legend(nrow = 3, byrow=TRUE))
+```
+
+**Q3.1_2 How familiar are you with the following data principles in relation to Open Data? CARE principles for Indigenous Data Governance (i.e. Collective benefit, Authority to control, Responsibility and Ethics)**
+```{r Q3.1_2}
+Q3.1_2 <-
+  sod2022 %>%
+  select(Survey, Q3.1_2) %>%
+    drop_na()
+
+Q3.1_2 <- Q3.1_2 %>%
+    subset(Q3.1_2 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.1_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+Q3.1_2$Q3.1_2 <-
+  factor(Q3.1_2$Q3.1_2,
+          levels = c(
+            "I have never heard of the data principles before now",
+            "I have previously heard of the data principles but I am not familiar with them",
+            "I am familiar with the data principles"
+          ))
+
+kable(Q3.1_2)
+```
+```{r Q3.1_2 visualisations}
+ggplot(Q3.1_2, aes(x="", y=n, fill=Q3.1_2)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+```
+
+## Attitudes towards sharing data
+
+**Do you think researchers currently get sufficient credit for sharing data?**
+```{r Q3.2}
+Q3.2 <-
+  sod2022 %>%
+  select(Survey, Q3.2) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.2 <- Q3.2 %>%
+  subset(Q3.2 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.2)
+
+Q3.2$Q3.2 <-
+  factor(Q3.2$Q3.2,
+         levels = c(
+           "No",
+           "No, they receive too little credit",
+           "No, they receive too much credit",
+           "I don't know",
+           "Not sure",
+           "Yes"
+           )
+         )
+```
+```{r Q3.2 visualisations}
+ggplot(Q3.2, aes(x=Survey, y=Pct, fill=Q3.2)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+
+ggplot(Q3.2, aes(x=(Survey), y = n, fill = Q3.2)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 3) +  
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  scale_y_continuous(limits = c(0,4300)) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  )
+
+ggplot(Q3.2, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.2)) +
+  scale_x_continuous(breaks = 2018:2022) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.3 What circumstances would motivate you to share your data?**
+```{r Q3.3}
+Q3.3_1 <-
+  select(sod2022, Survey, Q3.3_1) %>%
+  group_by(Survey) %>%
+  count(Q3.3_1) %>%
+  filter(Q3.3_1 != "0") %>%
+  rename("Q3.3" = "Q3.3_1")
+
+Q3.3_2 <-
+  select(sod2022, Survey, Q3.3_2) %>%
+  group_by(Survey) %>%
+  count(Q3.3_2) %>%
+  filter(Q3.3_2 != "0") %>%
+  rename("Q3.3" = "Q3.3_2")
+
+Q3.3_3 <-
+  select(sod2022, Survey, Q3.3_3) %>%
+  group_by(Survey) %>%
+  count(Q3.3_3) %>%
+  filter(Q3.3_3 != "0") %>%
+  rename("Q3.3" = "Q3.3_3")
+
+Q3.3_4 <-
+  select(sod2022, Survey, Q3.3_4) %>%
+  group_by(Survey) %>%
+  count(Q3.3_4) %>%
+  filter(Q3.3_4 != "0") %>%
+  rename("Q3.3" = "Q3.3_4")
+
+Q3.3_5 <-
+  select(sod2022, Survey, Q3.3_5) %>%
+  group_by(Survey) %>%
+  count(Q3.3_5) %>%
+  filter(Q3.3_5 != "0") %>%
+  rename("Q3.3" = "Q3.3_5")
+
+Q3.3_6 <-
+  select(sod2022, Survey, Q3.3_6) %>%
+  group_by(Survey) %>%
+  count(Q3.3_6) %>%
+  filter(Q3.3_6 != "0") %>%
+  rename("Q3.3" = "Q3.3_6")
+
+Q3.3_7 <-
+  select(sod2022, Survey, Q3.3_7) %>%
+  group_by(Survey) %>%
+  count(Q3.3_7) %>%
+  filter(Q3.3_7 != "0") %>%
+  rename("Q3.3" = "Q3.3_7")
+
+Q3.3_8 <-
+  select(sod2022, Survey, Q3.3_8) %>%
+  group_by(Survey) %>%
+  count(Q3.3_8) %>%
+  filter(Q3.3_8 != "0") %>%
+  rename("Q3.3" = "Q3.3_8")
+
+Q3.3_9 <-
+  select(sod2022, Survey, Q3.3_9) %>%
+  group_by(Survey) %>%
+  count(Q3.3_9) %>%
+  filter(Q3.3_9 != "0") %>%
+  rename("Q3.3" = "Q3.3_9")
+
+Q3.3_10 <-
+  select(sod2022, Survey, Q3.3_10) %>%
+  group_by(Survey) %>%
+  count(Q3.3_10) %>%
+  filter(Q3.3_10 != "0") %>%
+  rename("Q3.3" = "Q3.3_10")
+
+Q3.3_11 <-
+  select(sod2022, Survey, Q3.3_11) %>%
+  group_by(Survey) %>%
+  count(Q3.3_11) %>%
+  filter(Q3.3_11 != "0") %>%
+  rename("Q3.3" = "Q3.3_11")
+
+Q3.3_12 <-
+  select(sod2022, Survey, Q3.3_12) %>%
+  group_by(Survey) %>%
+  count(Q3.3_12) %>%
+  filter(Q3.3_12 != "0") %>%
+  rename("Q3.3" = "Q3.3_12")
+
+Q3.3_13 <-
+  select(sod2022, Survey, Q3.3_13) %>%
+  group_by(Survey) %>%
+  count(Q3.3_13) %>%
+  filter(Q3.3_13 != "0") %>%
+  rename("Q3.3" = "Q3.3_13")
+
+Q3.3_14 <-
+  select(sod2022, Survey, Q3.3_14) %>%
+  group_by(Survey) %>%
+  count(Q3.3_14) %>%
+  filter(Q3.3_14 != "0") %>%
+  rename("Q3.3" = "Q3.3_14")
+
+Q3.3_15 <-
+  select(sod2022, Survey, Q3.3_15) %>%
+  group_by(Survey) %>%
+  count(Q3.3_15) %>%
+  filter(Q3.3_15 != "0") %>%
+  rename("Q3.3" = "Q3.3_15")
+
+Q3.3_16 <-
+  select(sod2022, Survey, Q3.3_16) %>%
+  group_by(Survey) %>%
+  count(Q3.3_16) %>%
+  filter(Q3.3_16 != "0") %>%
+  rename("Q3.3" = "Q3.3_16")
+
+Q3.3_17 <-
+  select(sod2022, Survey, Q3.3_17) %>%
+  group_by(Survey) %>%
+  count(Q3.3_17) %>%
+  filter(Q3.3_17 != "0") %>%
+  rename("Q3.3" = "Q3.3_17")
+
+Q3.3_18 <-
+  select(sod2022, Survey, Q3.3_18) %>%
+  group_by(Survey) %>%
+  count(Q3.3_18) %>%
+  filter(Q3.3_18 != "0") %>%
+  rename("Q3.3" = "Q3.3_18")
+
+Q3.3 <- rbind(Q3.3_1, Q3.3_2, Q3.3_3, Q3.3_4, Q3.3_5, Q3.3_6, Q3.3_7, Q3.3_8, Q3.3_9, Q3.3_10, Q3.3_11, Q3.3_12, Q3.3_13, Q3.3_14, Q3.3_15, Q3.3_16, Q3.3_17, Q3.3_18)
+rm(Q3.3_1, Q3.3_2, Q3.3_3, Q3.3_4, Q3.3_5, Q3.3_6, Q3.3_7, Q3.3_8, Q3.3_9, Q3.3_10, Q3.3_11, Q3.3_12, Q3.3_13, Q3.3_14, Q3.3_15, Q3.3_16, Q3.3_17, Q3.3_18)
+
+# Keep only valid responses
+Q3.3 <- Q3.3 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.3)
+
+Q3.3$Q3.3 <-
+  recode_factor(
+    Q3.3$Q3.3,
+    "Getting proper credit for sharing data" = "Credit",
+    "Full data citation" = "Citation, data",                                   
+    "Citation of my research papers" = "Citation, paper",                       
+    "Co-authorship on papers" = "Co-author",                              
+    "Consideration in job reviews and funding applications" = "Job/Funding applications",
+    "Journal or Publisher requirement" = "Journal/Publisher requirement",
+    "Institution or Organisation requirement" = "Institution requirement",              
+    "Increased impact and visibility of my research" = "Impact",       
+    "Transparency and re-use" = "Reuse",                              
+    "Freedom of information request" = "FOI",                       
+    "Direct request from another research" = "Requested",                 
+    "It was made simple and easy to do" = "Simple to do",                    
+    "It was a field/industry expectation" = "Expectation to",                  
+    "Other (please specify)" = "Other",                               
+    "I would never share my data" = "Won't share"
+    )
+```
+```{r Q3.3 visualisations}
+ggplot(Q3.3, aes(x= factor(Survey), y = Pct, fill = Q3.3)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.2))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.3, aes(x= factor(Survey), y = n, fill = Q3.3)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,5000))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.3, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.3)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.4 Which one of the circumstances would motivate you the most to share your data?**
+```{r Q3.4}
+Q3.4 <-
+  sod2022 %>%
+  select(Survey, Q3.4) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.4 <- Q3.4 %>%
+  subset(Q3.4 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.4, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.4)
+
+Q3.4$Q3.4 <-
+  recode_factor(
+    Q3.4$Q3.4,
+    "Getting proper credit for sharing data" = "Credit",
+    "Full data citation" = "Citation, data",                                   
+    "Citation of my research papers" = "Citation, paper",                       
+    "Co-authorship on papers" = "Co-author",                              
+    "Consideration in job reviews and funding applications" = "Job/Funding applications",
+    "Journal or Publisher requirement" = "Journal/Publisher",                     
+    "Institution or Organisation requirement" = "Institution",              
+    "Increased impact and visibility of my research" = "Impact",       
+    "Transparency and re-use" = "Reuse",                              
+    "Freedom of information request" = "FOI",                       
+    "Direct request from another research" = "Requested",                 
+    "It was made simple and easy to do" = "Simple to do",                    
+    "It was a field/industry expectation" = "Expectation to",                  
+    "Other (please specify)" = "Other",                               
+    "I would never share my data" = "Won't share",
+    "Trust the person requesting the data" = "Trust request",
+    "Trust the person requesting my data" = "Trust request"
+    )
+```
+```{r Q3.4 visualisations}
+ggplot(Q3.4, aes(x= factor(Survey), y = Pct, fill = Q3.4)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.27))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.4, aes(x= factor(Survey), y = n, fill = Q3.4)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,1200))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.4, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.4)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+```{r Q3.4_1 free text, include = FALSE}
+Q3.4_1 <-
+  sod2022 %>%
+  select(Q3.4_1) %>%
+  subset(Q3.4_1 != 0) %>%
+  drop_na()
+Q3.4_1 <-
+  unique(Q3.4_1$Q3.4_1)
+kable(Q3.4_1)
+```
+
+**Q3.5 What problems/concerns, if any, do you have with sharing datasets? (Please select all that apply)**
+```{r Q3.5}
+# Select all that apply
+Q3.5_1 <-
+  select(sod2022, Survey, Q3.5_1) %>%
+  group_by(Survey) %>%
+  count(Q3.5_1) %>%
+  filter(Q3.5_1 != "0") %>%
+  rename("Q3.5" = "Q3.5_1")
+
+Q3.5_2 <-
+  select(sod2022, Survey, Q3.5_2) %>%
+  group_by(Survey) %>%
+  count(Q3.5_2) %>%
+  filter(Q3.5_2 != "0") %>%
+  rename("Q3.5" = "Q3.5_2")
+
+Q3.5_3 <-
+  select(sod2022, Survey, Q3.5_3) %>%
+  group_by(Survey) %>%
+  count(Q3.5_3) %>%
+  filter(Q3.5_3 != "0") %>%
+  rename("Q3.5" = "Q3.5_3")
+
+Q3.5_4 <-
+  select(sod2022, Survey, Q3.5_4) %>%
+  group_by(Survey) %>%
+  count(Q3.5_4) %>%
+  filter(Q3.5_4 != "0") %>%
+  rename("Q3.5" = "Q3.5_4")
+
+Q3.5_5 <-
+  select(sod2022, Survey, Q3.5_5) %>%
+  group_by(Survey) %>%
+  count(Q3.5_5) %>%
+  filter(Q3.5_5 != "0") %>%
+  rename("Q3.5" = "Q3.5_5")
+
+Q3.5_6 <-
+  select(sod2022, Survey, Q3.5_6) %>%
+  group_by(Survey) %>%
+  count(Q3.5_6) %>%
+  filter(Q3.5_6 != "0") %>%
+  rename("Q3.5" = "Q3.5_6")
+
+Q3.5_7 <-
+  select(sod2022, Survey, Q3.5_7) %>%
+  group_by(Survey) %>%
+  count(Q3.5_7) %>%
+  filter(Q3.5_7 != "0") %>%
+  rename("Q3.5" = "Q3.5_7")
+
+Q3.5_8 <-
+  select(sod2022, Survey, Q3.5_8) %>%
+  group_by(Survey) %>%
+  count(Q3.5_8) %>%
+  filter(Q3.5_8 != "0") %>%
+  rename("Q3.5" = "Q3.5_8")
+
+Q3.5_9 <-
+  select(sod2022, Survey, Q3.5_9) %>%
+  group_by(Survey) %>%
+  count(Q3.5_9) %>%
+  filter(Q3.5_9 != "0") %>%
+  rename("Q3.5" = "Q3.5_9")
+
+Q3.5_10 <-
+  select(sod2022, Survey, Q3.5_10) %>%
+  group_by(Survey) %>%
+  count(Q3.5_10) %>%
+  filter(Q3.5_10 != "0") %>%
+  rename("Q3.5" = "Q3.5_10")
+
+Q3.5_11 <-
+  select(sod2022, Survey, Q3.5_11) %>%
+  group_by(Survey) %>%
+  count(Q3.5_11) %>%
+  filter(Q3.5_11 != "0") %>%
+  rename("Q3.5" = "Q3.5_11")
+
+Q3.5_12 <-
+  select(sod2022, Survey, Q3.5_12) %>%
+  group_by(Survey) %>%
+  count(Q3.5_12) %>%
+  filter(Q3.5_12 != "0") %>%
+  rename("Q3.5" = "Q3.5_12")
+
+Q3.5_13 <-
+  select(sod2022, Survey, Q3.5_13) %>%
+  group_by(Survey) %>%
+  count(Q3.5_13) %>%
+  filter(Q3.5_13 != "0") %>%
+  rename("Q3.5" = "Q3.5_13")
+
+Q3.5_14 <-
+  select(sod2022, Survey, Q3.5_14) %>%
+  group_by(Survey) %>%
+  count(Q3.5_14) %>%
+  filter(Q3.5_14 != "0") %>%
+  rename("Q3.5" = "Q3.5_14")
+
+Q3.5_15 <-
+  select(sod2022, Survey, Q3.5_15) %>%
+  group_by(Survey) %>%
+  count(Q3.5_15) %>%
+  filter(Q3.5_15 != "0") %>%
+  rename("Q3.5" = "Q3.5_15")
+
+Q3.5_16 <-
+  select(sod2022, Survey, Q3.5_16) %>%
+  group_by(Survey) %>%
+  count(Q3.5_16) %>%
+  filter(Q3.5_16 != "0") %>%
+  rename("Q3.5" = "Q3.5_16")
+
+Q3.5_17 <-
+  select(sod2022, Survey, Q3.5_17) %>%
+  group_by(Survey) %>%
+  count(Q3.5_17) %>%
+  filter(Q3.5_17 != "0") %>%
+  rename("Q3.5" = "Q3.5_17")
+
+Q3.5_18 <-
+  select(sod2022, Survey, Q3.5_18) %>%
+  group_by(Survey) %>%
+  count(Q3.5_18) %>%
+  filter(Q3.5_18 != "0") %>%
+  rename("Q3.5" = "Q3.5_18")
+
+Q3.5_19 <-
+  select(sod2022, Survey, Q3.5_19) %>%
+  group_by(Survey) %>%
+  count(Q3.5_19) %>%
+  filter(Q3.5_19 != "0") %>%
+  rename("Q3.5" = "Q3.5_19")
+
+Q3.5 <- rbind(Q3.5_1, Q3.5_2, Q3.5_3, Q3.5_4, Q3.5_5, Q3.5_6, Q3.5_7, Q3.5_8, Q3.5_9, Q3.5_10, Q3.5_11, Q3.5_12, Q3.5_13, Q3.5_14, Q3.5_15, Q3.5_16, Q3.5_17, Q3.5_18, Q3.5_19)
+rm(Q3.5_1, Q3.5_2, Q3.5_3, Q3.5_4, Q3.5_5, Q3.5_6, Q3.5_7, Q3.5_8, Q3.5_9, Q3.5_10, Q3.5_11, Q3.5_12, Q3.5_13, Q3.5_14, Q3.5_15, Q3.5_16, Q3.5_17, Q3.5_18, Q3.5_19)
+
+# Keep only valid responses
+Q3.5 <- 
+  Q3.5 %>%
+  group_by(Survey) %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.5)
+
+Q3.5$Q3.5 <-
+  recode_factor(Q3.5$Q3.5,
+                "Contain sensitive information" = "Sensitive",
+                "Lack of time to deposit data" = "No time",
+                "Costs of sharing data" = "Costs",
+                "Unsure about copyright licensing" = "Copyright",
+                "Data are too large to share" =  "Too big",
+                "Not know what repository to use" = "Don't know repository",
+                "Unsure I have the permission to share" = "Permission issues",
+                "Data are too small or unimportant" = "Too small",
+                "Organising data in a presentable and useful way" = "Useful",
+                "Organising data in a presentable and usable way" = "Usable",
+                "Concerns about misuse of data" = "Misuse concern",
+                "Not receiving appropriate credit or acknowledgement" = "Acknowlegement",
+                "Another lab may make a different interpretation of my data" = "Different interpretation",
+                "Another lab may 'scoop' me to a discovery" = "'Scoop'",
+                "Another lab may 'scoop' (or has already 'scooped') me to a discovery" = "'Scoop'",
+                "I'm not sure I've exhausted all the potential findings yet" = "Still publishing",
+                "Others may find errors in my data" = "Data errors",
+                "Others may not be able to repeat my findings" = "Replication concerns",
+                "Other (please specify)" = "Other",
+                "I have no desire to share my data" = "Don't want to share",
+                "I have no problems/concerns about sharing data" = "Want to share")
+```
+```{r Q3.5 visualisations}
+ggplot(Q3.5, aes(x= factor(Survey), y = Pct, fill = Q3.5)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.13))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.5, aes(x= factor(Survey), y = n, fill = Q3.5)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2100))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.5, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.5)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.6 How do you think the data shared by others has or could benefit you? (Please select all that apply)**
+```{r Q3.6}
+Q3.6_1 <-
+  select(sod2022, Survey, Q3.6_1) %>%
+  group_by(Survey) %>%
+  count(Q3.6_1) %>%
+  filter(Q3.6_1 != "0") %>%
+  rename("Q3.6" = "Q3.6_1")
+
+Q3.6_2 <-
+  select(sod2022, Survey, Q3.6_2) %>%
+  group_by(Survey) %>%
+  count(Q3.6_2) %>%
+  filter(Q3.6_2 != "0") %>%
+  rename("Q3.6" = "Q3.6_2")
+
+Q3.6_3 <-
+  select(sod2022, Survey, Q3.6_3) %>%
+  group_by(Survey) %>%
+  count(Q3.6_3) %>%
+  filter(Q3.6_3 != "0") %>%
+  rename("Q3.6" = "Q3.6_3")
+
+Q3.6_4 <-
+  select(sod2022, Survey, Q3.6_4) %>%
+  group_by(Survey) %>%
+  count(Q3.6_4) %>%
+  filter(Q3.6_4 != "0") %>%
+  rename("Q3.6" = "Q3.6_4")
+
+Q3.6_5 <-
+  select(sod2022, Survey, Q3.6_5) %>%
+  group_by(Survey) %>%
+  count(Q3.6_5) %>%
+  filter(Q3.6_5 != "0") %>%
+  rename("Q3.6" = "Q3.6_5")
+
+Q3.6_6 <-
+  select(sod2022, Survey, Q3.6_6) %>%
+  group_by(Survey) %>%
+  count(Q3.6_6) %>%
+  filter(Q3.6_6 != "0") %>%
+  rename("Q3.6" = "Q3.6_6")
+
+Q3.6 <- rbind(Q3.6_1, Q3.6_2, Q3.6_3, Q3.6_4, Q3.6_5, Q3.6_6)
+rm(Q3.6_1, Q3.6_2, Q3.6_3, Q3.6_4, Q3.6_5, Q3.6_6)
+
+# Include all responses
+Q3.6 <- Q3.6 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.6)
+```
+```{r Q3.6 visualisations}
+ggplot(Q3.6, aes(x=Survey, y=Pct, fill=Q3.6)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+
+ggplot(Q3.6, aes(x=(Survey), y = n, fill = Q3.6)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 3) +  
+  scale_x_continuous(breaks = 2016:2022) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  )
+
+ggplot(Q3.6, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.6)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2016:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+## Planning data management
+
+**Q3.7 Are you aware of the concept of a data management plan?**
+```{r Q3.7}
+Q3.7 <-
+  sod2022 %>%
+  select(Survey, Q3.7) %>%
+    drop_na()
+
+Q3.7 <- Q3.7 %>%
+    subset(Q3.7 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.7, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+kable(Q3.7)
+```
+```{r Q3.7 visualisations}
+ggplot(Q3.7, aes(x="", y=n, fill=Q3.7)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 1, byrow=TRUE))
+```
+
+**Q3.8 To what extent do you feel capable of developing a practical data management plan if you were required to do so?**
+```{r Q3.8}
+Q3.8 <-
+  sod2022 %>%
+  select(Survey, Q3.8) %>%
+    drop_na()
+
+Q3.8 <- Q3.8 %>%
+    subset(Q3.8 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.8, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+Q3.8$Q3.8 <-
+  recode_factor(Q3.8$Q3.8,
+                "I would require moderate training/further information" = "Require moderate training",
+                "I would require extensive training/further information" = "Require extensive/full training"
+  )
+
+Q3.8$Q3.8 <-
+  factor(Q3.8$Q3.8,
+         levels = c(
+           "Require extensive/full training",
+           "Require moderate training",
+           "Competent",
+           "Fully competent"
+           )
+         )
+
+kable(Q3.8)
+```
+```{r Q3.8 visualisations}
+ggplot(Q3.8, aes(x= factor(Survey), y = Pct, fill = Q3.8)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.4))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.8, aes(x= factor(Survey), y = n, fill = Q3.8)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2100))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+```
+
+**Q3.9 Have you ever created a data management plan?**
+```{r Q3.9}
+Q3.9 <-
+  sod2022 %>%
+  select(Survey, Q3.9) %>%
+    drop_na()
+
+Q3.9 <- Q3.9 %>%
+    subset(Q3.9 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.9, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+kable(Q3.9)
+```
+```{r Q3.9 visualisations}
+ggplot(Q3.9, aes(x="", y=n, fill=Q3.9)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 4, byrow=TRUE))
+```
+
+**Q3.10 What were the key reasons that led you to creating a data management plan? (Please select all that apply)**
+```{r Q3.10}
+Q3.10_1 <-
+  select(sod2022, Survey, Q3.10_1) %>%
+  group_by(Survey) %>%
+  count(Q3.10_1) %>%
+  filter(Q3.10_1 != "0") %>%
+  rename("Q3.10" = "Q3.10_1")
+
+Q3.10_2 <-
+  select(sod2022, Survey, Q3.10_2) %>%
+  group_by(Survey) %>%
+  count(Q3.10_2) %>%
+  filter(Q3.10_2 != "0") %>%
+  rename("Q3.10" = "Q3.10_2")
+
+Q3.10_3 <-
+  select(sod2022, Survey, Q3.10_3) %>%
+  group_by(Survey) %>%
+  count(Q3.10_3) %>%
+  filter(Q3.10_3 != "0") %>%
+  rename("Q3.10" = "Q3.10_3")
+
+Q3.10_4 <-
+  select(sod2022, Survey, Q3.10_4) %>%
+  group_by(Survey) %>%
+  count(Q3.10_4) %>%
+  filter(Q3.10_4 != "0") %>%
+  rename("Q3.10" = "Q3.10_4")
+
+Q3.10_5 <-
+  select(sod2022, Survey, Q3.10_5) %>%
+  group_by(Survey) %>%
+  count(Q3.10_5) %>%
+  filter(Q3.10_5 != "0") %>%
+  rename("Q3.10" = "Q3.10_5")
+
+Q3.10_6 <-
+  select(sod2022, Survey, Q3.10_6) %>%
+  group_by(Survey) %>%
+  count(Q3.10_6) %>%
+  filter(Q3.10_6 != "0") %>%
+  rename("Q3.10" = "Q3.10_6")
+
+Q3.10_7 <-
+  select(sod2022, Survey, Q3.10_7) %>%
+  group_by(Survey) %>%
+  count(Q3.10_7) %>%
+  filter(Q3.10_7 != "0") %>%
+  rename("Q3.10" = "Q3.10_7")
+
+Q3.10_8 <-
+  select(sod2022, Survey, Q3.10_8) %>%
+  group_by(Survey) %>%
+  count(Q3.10_8) %>%
+  filter(Q3.10_8 != "0") %>%
+  rename("Q3.10" = "Q3.10_8")
+
+Q3.10 <- rbind(Q3.10_1, Q3.10_2, Q3.10_3, Q3.10_4, Q3.10_5, Q3.10_6, Q3.10_7, Q3.10_8)
+rm(Q3.10_1, Q3.10_2, Q3.10_3, Q3.10_4, Q3.10_5, Q3.10_6, Q3.10_7, Q3.10_8)
+
+# Include all responses
+Q3.10 <- Q3.10 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.10)
+```
+```{r Q3.10 visualisations}
+ggplot(Q3.10, aes(x=reorder(Q3.10, n), y=Pct)) +
+  geom_col() +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            vjust = -.3,
+            size = 3) +  
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,.3))  +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+```
+
+**Q3.11 To what extent did you implement the data management plan for the last project you completed?**
+```{r Q3.11}
+Q3.11 <-
+  sod2022 %>%
+  select(Survey, Q3.11) %>%
+    drop_na()
+
+Q3.11 <- Q3.11 %>%
+    subset(Q3.11 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.11, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+Q3.11$Q3.11 <-
+  factor(Q3.11$Q3.11,
+         levels = c(
+           "Not at all",
+           "Somewhat",
+           "Entirely"
+           )
+         )
+
+kable(Q3.11)
+```
+```{r Q3.11 visualisations}
+ggplot(Q3.11, aes(x="", y=n, fill=Q3.11)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+```
+
+**Q3.12 To what extent have you implemented your data management plan for your current project?**
+```{r Q3.12}
+Q3.12 <-
+  sod2022 %>%
+  select(Survey, Q3.12) %>%
+    drop_na()
+
+Q3.12 <- Q3.12 %>%
+    subset(Q3.12 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.12, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+Q3.12$Q3.12 <-
+  factor(Q3.12$Q3.12,
+         levels = c(
+           "Not at all",
+           "Somewhat",
+           "Entirely"
+           )
+         )
+
+kable(Q3.12)
+```
+```{r Q3.12 visualisations}
+ggplot(Q3.12, aes(x="", y=n, fill=Q3.12)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+```
+
+**Q3.13 What, if any, challenges have you experienced in implementing data management plans? (Please select all that apply)**
+```{r Q3.13}
+Q3.13_1 <-
+  select(sod2022, Survey, Q3.13_1) %>%
+  group_by(Survey) %>%
+  count(Q3.13_1) %>%
+  filter(Q3.13_1 != "0") %>%
+  rename("Q3.13" = "Q3.13_1")
+
+Q3.13_2 <-
+  select(sod2022, Survey, Q3.13_2) %>%
+  group_by(Survey) %>%
+  count(Q3.13_2) %>%
+  filter(Q3.13_2 != "0") %>%
+  rename("Q3.13" = "Q3.13_2")
+
+Q3.13_3 <-
+  select(sod2022, Survey, Q3.13_3) %>%
+  group_by(Survey) %>%
+  count(Q3.13_3) %>%
+  filter(Q3.13_3 != "0") %>%
+  rename("Q3.13" = "Q3.13_3")
+
+Q3.13_4 <-
+  select(sod2022, Survey, Q3.13_4) %>%
+  group_by(Survey) %>%
+  count(Q3.13_4) %>%
+  filter(Q3.13_4 != "0") %>%
+  rename("Q3.13" = "Q3.13_4")
+
+Q3.13_5 <-
+  select(sod2022, Survey, Q3.13_5) %>%
+  group_by(Survey) %>%
+  count(Q3.13_5) %>%
+  filter(Q3.13_5 != "0") %>%
+  rename("Q3.13" = "Q3.13_5")
+
+Q3.13_6 <-
+  select(sod2022, Survey, Q3.13_6) %>%
+  group_by(Survey) %>%
+  count(Q3.13_6) %>%
+  filter(Q3.13_6 != "0") %>%
+  rename("Q3.13" = "Q3.13_6")
+
+Q3.13 <- rbind(Q3.13_1, Q3.13_2, Q3.13_3, Q3.13_4, Q3.13_5, Q3.13_6)
+rm(Q3.13_1, Q3.13_2, Q3.13_3, Q3.13_4, Q3.13_5, Q3.13_6)
+
+# Include all responses
+Q3.13 <- Q3.13 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.13)
+```
+```{r Q3.13 visualisations}
+ggplot(Q3.13, aes(x=reorder(Q3.13, n), y=Pct)) +
+  geom_col() +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            vjust = -.3,
+            size = 3) +  
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,.33))  +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+```
+
+**Q3.14 In which, if any, aspects of data management planning do you feel you would benefit from further skills training/information? (Please select all that apply)**
+```{r Q3.14}
+Q3.14_1 <-
+  select(sod2022, Survey, Q3.14_1) %>%
+  group_by(Survey) %>%
+  count(Q3.14_1) %>%
+  filter(Q3.14_1 != "0") %>%
+  rename("Q3.14" = "Q3.14_1")
+
+Q3.14_2 <-
+  select(sod2022, Survey, Q3.14_2) %>%
+  group_by(Survey) %>%
+  count(Q3.14_2) %>%
+  filter(Q3.14_2 != "0") %>%
+  rename("Q3.14" = "Q3.14_2")
+
+Q3.14_3 <-
+  select(sod2022, Survey, Q3.14_3) %>%
+  group_by(Survey) %>%
+  count(Q3.14_3) %>%
+  filter(Q3.14_3 != "0") %>%
+  rename("Q3.14" = "Q3.14_3")
+
+Q3.14_4 <-
+  select(sod2022, Survey, Q3.14_4) %>%
+  group_by(Survey) %>%
+  count(Q3.14_4) %>%
+  filter(Q3.14_4 != "0") %>%
+  rename("Q3.14" = "Q3.14_4")
+
+Q3.14_5 <-
+  select(sod2022, Survey, Q3.14_5) %>%
+  group_by(Survey) %>%
+  count(Q3.14_5) %>%
+  filter(Q3.14_5 != "0") %>%
+  rename("Q3.14" = "Q3.14_5")
+
+Q3.14_6 <-
+  select(sod2022, Survey, Q3.14_6) %>%
+  group_by(Survey) %>%
+  count(Q3.14_6) %>%
+  filter(Q3.14_6 != "0") %>%
+  rename("Q3.14" = "Q3.14_6")
+
+Q3.14_7 <-
+  select(sod2022, Survey, Q3.14_7) %>%
+  group_by(Survey) %>%
+  count(Q3.14_7) %>%
+  filter(Q3.14_7 != "0") %>%
+  rename("Q3.14" = "Q3.14_7")
+
+Q3.14 <- rbind(Q3.14_1, Q3.14_2, Q3.14_3, Q3.14_4, Q3.14_5, Q3.14_6, Q3.14_7)
+rm(Q3.14_1, Q3.14_2, Q3.14_3, Q3.14_4, Q3.14_5, Q3.14_6, Q3.14_7)
+
+# Include all responses
+Q3.14 <- Q3.14 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.14)
+```
+```{r Q3.14 visualisations}
+ggplot(Q3.14, aes(x= factor(Survey), y = Pct, fill = Q3.14)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.3))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    ) +
+    guides(fill=guide_legend(nrow = 6, byrow=TRUE))
+
+ggplot(Q3.14, aes(x= factor(Survey), y = n, fill = Q3.14)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,3900))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    ) +
+    guides(fill=guide_legend(nrow = 6, byrow=TRUE))
+```
+
+## Collection and curation of research data
+
+**Q3.15 Do you curate/prepare your data for sharing (during or after the data collection process) either privately or publicly?**
+```{r Q3.15}
+Q3.15 <-
+  sod2022 %>%
+  select(Survey, Q3.15) %>%
+    drop_na()
+
+Q3.15 <- Q3.15 %>%
+    subset(Q3.15 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.15, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.15)
+
+Q3.15$Q3.15 <-
+  recode_factor(Q3.15$Q3.15,
+                "Yes, but only data shared with colleagues or beyond" = "Yes, only data shared",
+                "Yes, but only data shared publicly" = "Yes, shared publicly",
+                "No, it's not important with our data" = "No, not important",
+                "No, we don't have the resource to do this but would like to" = "No, no resources",
+                "No, we don’t have the resource to do this but would like to" = "No, no resources",
+                "No, other (please specify)" = "No, other"
+                )
+
+Q3.15$Q3.15 <- factor(Q3.15$Q3.15, levels=c(
+  "Yes, all data",
+  "Yes, shared publicly",
+  "Yes, some",
+  "Yes, only data shared",
+  "No, no resources",
+  "No, not important",
+  "No, other"
+  ))
+```
+```{r Q3.15 visualisations}
+ggplot(Q3.15, aes(x= factor(Survey), y = Pct, fill = Q3.15)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.15, aes(x= factor(Survey), y = n, fill = Q3.15)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2000))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.15, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.15)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.16 Where do you store your research data while your project is underway? (Please select all that apply)**
+```{r Q3.16}
+Q3.16_1 <-
+  select(sod2022, Survey, Q3.16_1) %>%
+  group_by(Survey) %>%
+  count(Q3.16_1) %>%
+  filter(Q3.16_1 != "0") %>%
+  rename("Q3.16" = "Q3.16_1")
+
+Q3.16_2 <-
+  select(sod2022, Survey, Q3.16_2) %>%
+  group_by(Survey) %>%
+  count(Q3.16_2) %>%
+  filter(Q3.16_2 != "0") %>%
+  rename("Q3.16" = "Q3.16_2")
+
+Q3.16_3 <-
+  select(sod2022, Survey, Q3.16_3) %>%
+  group_by(Survey) %>%
+  count(Q3.16_3) %>%
+  filter(Q3.16_3 != "0") %>%
+  rename("Q3.16" = "Q3.16_3")
+
+Q3.16_4 <-
+  select(sod2022, Survey, Q3.16_4) %>%
+  group_by(Survey) %>%
+  count(Q3.16_4) %>%
+  filter(Q3.16_4 != "0") %>%
+  rename("Q3.16" = "Q3.16_4")
+
+Q3.16_5 <-
+  select(sod2022, Survey, Q3.16_5) %>%
+  group_by(Survey) %>%
+  count(Q3.16_5) %>%
+  filter(Q3.16_5 != "0") %>%
+  rename("Q3.16" = "Q3.16_5")
+
+Q3.16_6 <-
+  select(sod2022, Survey, Q3.16_6) %>%
+  group_by(Survey) %>%
+  count(Q3.16_6) %>%
+  filter(Q3.16_6 != "0") %>%
+  rename("Q3.16" = "Q3.16_6")
+
+Q3.16_7 <-
+  select(sod2022, Survey, Q3.16_7) %>%
+  group_by(Survey) %>%
+  count(Q3.16_7) %>%
+  filter(Q3.16_7 != "0") %>%
+  rename("Q3.16" = "Q3.16_7")
+
+Q3.16 <- rbind(Q3.16_1, Q3.16_2, Q3.16_3, Q3.16_4, Q3.16_5, Q3.16_6, Q3.16_7)
+rm(Q3.16_1, Q3.16_2, Q3.16_3, Q3.16_4, Q3.16_5, Q3.16_6, Q3.16_7)
+
+# Include all responses
+Q3.16 <- Q3.16 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.16)
+```
+```{r Q3.16 visualisations}
+ggplot(Q3.16, aes(x=reorder(Q3.16, n), y=Pct)) +
+  geom_col() +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            vjust = -.3,
+            size = 3) +  
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,.37))  +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+```
+
+**Q3.17 Would you be willing to allow any of the following to help review, curate, or prepare your data for making it publicly available? (Please select all that apply)**
+```{r Q3.17}
+Q3.17_1 <-
+  select(sod2022, Survey, Q3.17_1) %>%
+  group_by(Survey) %>%
+  count(Q3.17_1) %>%
+  filter(Q3.17_1 != "0") %>%
+  rename("Q3.17" = "Q3.17_1")
+
+Q3.17_2 <-
+  select(sod2022, Survey, Q3.17_2) %>%
+  group_by(Survey) %>%
+  count(Q3.17_2) %>%
+  filter(Q3.17_2 != "0") %>%
+  rename("Q3.17" = "Q3.17_2")
+
+Q3.17_3 <-
+  select(sod2022, Survey, Q3.17_3) %>%
+  group_by(Survey) %>%
+  count(Q3.17_3) %>%
+  filter(Q3.17_3 != "0") %>%
+  rename("Q3.17" = "Q3.17_3")
+
+Q3.17_4 <-
+  select(sod2022, Survey, Q3.17_4) %>%
+  group_by(Survey) %>%
+  count(Q3.17_4) %>%
+  filter(Q3.17_4 != "0") %>%
+  rename("Q3.17" = "Q3.17_4")
+
+Q3.17_5 <-
+  select(sod2022, Survey, Q3.17_5) %>%
+  group_by(Survey) %>%
+  count(Q3.17_5) %>%
+  filter(Q3.17_5 != "0") %>%
+  rename("Q3.17" = "Q3.17_5")
+
+Q3.17_6 <-
+  select(sod2022, Survey, Q3.17_6) %>%
+  group_by(Survey) %>%
+  count(Q3.17_6) %>%
+  filter(Q3.17_6 != "0") %>%
+  rename("Q3.17" = "Q3.17_6")
+
+Q3.17_7 <-
+  select(sod2022, Survey, Q3.17_7) %>%
+  group_by(Survey) %>%
+  count(Q3.17_7) %>%
+  filter(Q3.17_7 != "0") %>%
+  rename("Q3.17" = "Q3.17_7")
+
+Q3.17 <- rbind(Q3.17_1, Q3.17_2, Q3.17_3, Q3.17_4, Q3.17_5, Q3.17_6, Q3.17_7)
+rm(Q3.17_1, Q3.17_2, Q3.17_3, Q3.17_4, Q3.17_5, Q3.17_6, Q3.17_7)
+
+# Include all responses
+Q3.17 <- Q3.17 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.17)
+```
+```{r Q3.17 visualisations}
+ggplot(Q3.17, aes(x= factor(Survey), y = Pct, fill = Q3.17)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.17, aes(x= factor(Survey), y = n, fill = Q3.17)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2500))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.17, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.17)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.18 What areas, if any, do you feel you need help with in regards to managing your research data during the collection period? (Please select all that apply)**
+```{r Q3.18}
+Q3.18_1 <-
+  select(sod2022, Survey, Q3.18_1) %>%
+  group_by(Survey) %>%
+  count(Q3.18_1) %>%
+  filter(Q3.18_1 != "0") %>%
+  rename("Q3.18" = "Q3.18_1")
+
+Q3.18_2 <-
+  select(sod2022, Survey, Q3.18_2) %>%
+  group_by(Survey) %>%
+  count(Q3.18_2) %>%
+  filter(Q3.18_2 != "0") %>%
+  rename("Q3.18" = "Q3.18_2")
+
+Q3.18_3 <-
+  select(sod2022, Survey, Q3.18_3) %>%
+  group_by(Survey) %>%
+  count(Q3.18_3) %>%
+  filter(Q3.18_3 != "0") %>%
+  rename("Q3.18" = "Q3.18_3")
+
+Q3.18_4 <-
+  select(sod2022, Survey, Q3.18_4) %>%
+  group_by(Survey) %>%
+  count(Q3.18_4) %>%
+  filter(Q3.18_4 != "0") %>%
+  rename("Q3.18" = "Q3.18_4")
+
+Q3.18_5 <-
+  select(sod2022, Survey, Q3.18_5) %>%
+  group_by(Survey) %>%
+  count(Q3.18_5) %>%
+  filter(Q3.18_5 != "0") %>%
+  rename("Q3.18" = "Q3.18_5")
+
+Q3.18_6 <-
+  select(sod2022, Survey, Q3.18_6) %>%
+  group_by(Survey) %>%
+  count(Q3.18_6) %>%
+  filter(Q3.18_6 != "0") %>%
+  rename("Q3.18" = "Q3.18_6")
+
+Q3.18_7 <-
+  select(sod2022, Survey, Q3.18_7) %>%
+  group_by(Survey) %>%
+  count(Q3.18_7) %>%
+  filter(Q3.18_7 != "0") %>%
+  rename("Q3.18" = "Q3.18_7")
+
+Q3.18 <- rbind(Q3.18_1, Q3.18_2, Q3.18_3, Q3.18_4, Q3.18_5, Q3.18_6, Q3.18_7)
+rm(Q3.18_1, Q3.18_2, Q3.18_3, Q3.18_4, Q3.18_5, Q3.18_6, Q3.18_7)
+
+# Include all responses
+Q3.18 <- Q3.18 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.18)
+```
+```{r Q3.18 visualisations}
+ggplot(Q3.18, aes(x=reorder(Q3.18, n), y=Pct)) +
+  geom_col() +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            vjust = -.3,
+            size = 3) +  
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+    scale_y_continuous(limits = c(0,.27))  +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+```
+
+**Q3.19 At which point during the research cycle, if at all, do you make your data available?**
+```{r Q3.19}
+Q3.19 <-
+  sod2022 %>%
+  select(Survey, Q3.19) %>%
+    drop_na()
+
+Q3.19 <- Q3.19 %>%
+    subset(Q3.19 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.19, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.19)
+```
+```{r Q3.19 visualisations}
+ggplot(Q3.19, aes(x= factor(Survey), y = Pct, fill = Q3.19)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.45))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    ) +
+    guides(fill=guide_legend(nrow = 4, byrow=TRUE))
+
+ggplot(Q3.19, aes(x= factor(Survey), y = n, fill = Q3.19)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2500))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    ) +
+    guides(fill=guide_legend(nrow = 4, byrow=TRUE))
+
+ggplot(Q3.19, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.19)) +
+  scale_x_continuous(breaks = 2021:2022) +  
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+) +
+  guides(fill=guide_legend(nrow = 4, byrow=TRUE))
+```
+
+**Q3.20 How do you share your research data with a public audience? (Please select all that apply)**
+```{r Q3.20}
+# Select all that apply
+Q3.20_1 <-
+  select(sod2022, Survey, Q3.20_1) %>%
+  count(Q3.20_1) %>%
+  filter(Q3.20_1 != "0") %>%
+  rename("Q3.20" = "Q3.20_1")
+
+Q3.20_2 <-
+  select(sod2022, Survey, Q3.20_2) %>%
+  count(Q3.20_2) %>%
+  filter(Q3.20_2 != "0") %>%
+  rename("Q3.20" = "Q3.20_2")
+
+Q3.20_3 <-
+  select(sod2022, Survey, Q3.20_3) %>%
+  count(Q3.20_3) %>%
+  filter(Q3.20_3 != "0") %>%
+  rename("Q3.20" = "Q3.20_3")
+
+Q3.20_4 <-
+  select(sod2022, Survey, Q3.20_4) %>%
+  count(Q3.20_4) %>%
+  filter(Q3.20_4 != "0") %>%
+  rename("Q3.20" = "Q3.20_4")
+
+Q3.20_5 <-
+  select(sod2022, Survey, Q3.20_5) %>%
+  count(Q3.20_5) %>%
+  filter(Q3.20_5 != "0") %>%
+  rename("Q3.20" = "Q3.20_5")
+
+Q3.20 <- rbind(Q3.20_1, Q3.20_2, Q3.20_3, Q3.20_4, Q3.20_5)
+rm(Q3.20_1, Q3.20_2, Q3.20_3, Q3.20_4, Q3.20_5)
+
+Q3.20 <- Q3.20 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.20)
+```
+```{r Q3.20 visualisations}
+ggplot(Q3.20, aes(x= reorder(Q3.20, n), y = Pct * 100)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            hjust = 1.3,
+            size = 3,
+            colour = "#FFFFFF") +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+) +
+  coord_flip()
+```
+
+**Q3.21 To what extent do you think you make your data open in compliance with: [Note: by open we mean free to access, reuse, repurpose and redistribute]**
+
+**Q3.21_1 FAIR data principles (i.e. Findable, Accessible, Interoperable and Reusable)**
+```{r Q3.21_1}
+# Keep only valid responses
+Q3.21_1 <-
+  sod2022 %>%
+  select(Survey, Q3.21_1) %>%
+    drop_na()
+
+Q3.21_1 <- Q3.21_1 %>%
+    subset(Q3.21_1 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.21_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.21_1)
+```
+```{r Q3.21_1 visualisations}
+ggplot(Q3.21_1, aes(x= factor(Survey), y = Pct, fill = Q3.21_1)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.21_1, aes(x= factor(Survey), y = n, fill = Q3.21_1)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2400))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.21_1, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.21_1)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+Q3.21_1 %>%
+  filter(Survey == 2022) %>%
+  ggplot(aes(x="", y=n, fill=Q3.21_1)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    title = "FAIR compliance 2022",
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+```
+
+**Q3.21_2 CARE principles for Indigenous Data Governance (i.e. Collective benefit, Authority to control, Responsibility and Ethics)**
+```{r Q3.21_2}
+# Keep only valid responses
+Q3.21_2 <-
+  sod2022 %>%
+  select(Survey, Q3.21_2) %>%
+    drop_na()
+
+Q3.21_2 <- Q3.21_2 %>%
+    subset(Q3.21_2 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.21_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.21_2$Q3.21_2 <- factor(Q3.21_2$Q3.21_2, levels = c("Entirely", "Somewhat", "Not at all", "I am not aware of these principles"))
+
+kable(Q3.21_2)
+```
+```{r Q3.21_2 visualisations}
+ggplot(Q3.21_2, aes(x="", y=n, fill=Q3.21_2)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    title = "CARE complience 2022",
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+```
+
+**Q3.22 To what extent do you think researchers in your field more generally make their data open in compliance with: [Note: by open we mean free to access, reuse, repurpose and redistribute]**
+
+**Q3.22_1 FAIR data principles (i.e. Findable, Accessible, Interoperable and Reusable)**
+```{r Q3.22_1}
+# Keep only valid responses
+Q3.22_1 <-
+  sod2022 %>%
+  select(Survey, Q3.22_1) %>%
+    drop_na()
+
+Q3.22_1 <- Q3.22_1 %>%
+    subset(Q3.22_1 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.22_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.22_1$Q3.22_1 <- factor(Q3.22_1$Q3.22_1, levels = c("Entirely", "Somewhat", "Not at all", "I am not aware of these principles"))
+
+kable(Q3.22_1)
+```
+```{r Q3.22_1 visualisations}
+ggplot(Q3.22_1, aes(x="", y=n, fill=Q3.22_1)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+```
+
+**Q3.22_2 CARE principles for Indigenous Data Governance (i.e. Collective benefit, Authority to control, Responsibility and Ethics)**
+```{r Q3.22_2}
+# Keep only valid responses
+Q3.22_2 <-
+  sod2022 %>%
+  select(Survey, Q3.22_2) %>%
+    drop_na()
+
+Q3.22_2 <- Q3.22_2 %>%
+    subset(Q3.22_2 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.22_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.22_2$Q3.22_2 <- factor(Q3.22_2$Q3.22_2, levels = c("Entirely", "Somewhat", "Not at all", "I am not aware of these principles"))
+
+kable(Q3.22_2)
+```
+```{r Q3.22_2 visualisations}
+ggplot(Q3.22_2, aes(x="", y=n, fill=Q3.22_2)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+```
+
+**Q3.23 What recognition have you received for sharing your research data? (Please select all that apply)**
+```{r Q3.23}
+Q3.23_1 <-
+  select(sod2022, Survey, Q3.23_1) %>%
+  group_by(Survey) %>%
+  count(Q3.23_1) %>%
+  filter(Q3.23_1 != "0") %>%
+  rename("Q3.23" = "Q3.23_1")
+
+Q3.23_2 <-
+  select(sod2022, Survey, Q3.23_2) %>%
+  group_by(Survey) %>%
+  count(Q3.23_2) %>%
+  filter(Q3.23_2 != "0") %>%
+  rename("Q3.23" = "Q3.23_2")
+
+Q3.23_3 <-
+  select(sod2022, Survey, Q3.23_3) %>%
+  group_by(Survey) %>%
+  count(Q3.23_3) %>%
+  filter(Q3.23_3 != "0") %>%
+  rename("Q3.23" = "Q3.23_3")
+
+Q3.23_4 <-
+  select(sod2022, Survey, Q3.23_4) %>%
+  group_by(Survey) %>%
+  count(Q3.23_4) %>%
+  filter(Q3.23_4 != "0") %>%
+  rename("Q3.23" = "Q3.23_4")
+
+Q3.23_5 <-
+  select(sod2022, Survey, Q3.23_5) %>%
+  group_by(Survey) %>%
+  count(Q3.23_5) %>%
+  filter(Q3.23_5 != "0") %>%
+  rename("Q3.23" = "Q3.23_5")
+
+Q3.23_6 <-
+  select(sod2022, Survey, Q3.23_6) %>%
+  group_by(Survey) %>%
+  count(Q3.23_6) %>%
+  filter(Q3.23_6 != "0") %>%
+  rename("Q3.23" = "Q3.23_6")
+
+Q3.23_7 <-
+  select(sod2022, Survey, Q3.23_7) %>%
+  group_by(Survey) %>%
+  count(Q3.23_7) %>%
+  filter(Q3.23_7 != "0") %>%
+  rename("Q3.23" = "Q3.23_7")
+
+Q3.23_8 <-
+  select(sod2022, Survey, Q3.23_8) %>%
+  group_by(Survey) %>%
+  count(Q3.23_8) %>%
+  filter(Q3.23_8 != "0") %>%
+  rename("Q3.23" = "Q3.23_8")
+
+Q3.23 <- rbind(Q3.23_1, Q3.23_2, Q3.23_3, Q3.23_4, Q3.23_5, Q3.23_6, Q3.23_7, Q3.23_8)
+rm(Q3.23_1, Q3.23_2, Q3.23_3, Q3.23_4, Q3.23_5, Q3.23_6, Q3.23_7, Q3.23_8)
+
+# Keep only valid responses
+Q3.23 <- 
+  Q3.23 %>%
+  group_by(Survey) %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.23)
+
+Q3.23$Q3.23 <-
+  recode_factor(Q3.23$Q3.23,
+                "I don't know" = "Don't know",
+                "Full citation in another article"  = "Citation",              
+                "Co-authorship on a paper which used my data" = "Co-authorship",
+                "Other (please specify)" = "Other",
+                "Consideration of actions in a job review" = "Consideration, grant",
+                "Consideration of actions in a grant application" = "Consideration, job")
+```
+```{r Q3.23 visualisations}
+ggplot(Q3.23, aes(x= factor(Survey), y = Pct, fill = Q3.23)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.52))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.23, aes(x= factor(Survey), y = n, fill = Q3.23)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2200))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.23, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.23)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.24 Have you ever been involved in a collaboration as a result of data you have previously shared?**
+```{r Q3.24}
+Q3.24 <-
+  sod2022 %>%
+  select(Survey, Q3.24) %>%
+    drop_na()
+
+Q3.24 <- Q3.24 %>%
+  subset(Q3.24 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.24, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.24)
+```
+```{r Q3.24 visualisations}
+ggplot(Q3.24, aes(x= factor(Survey), y = Pct, fill = Q3.24)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.6))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.24, aes(x= factor(Survey), y = n, fill = Q3.24)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,3000))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+```
+
+**Q3.25 Who would/does meet the costs of making your research data openly accessible (e.g. resource for curation)?**
+```{r Q3.25}
+# Keep only valid responses
+Q3.25 <-
+  sod2022 %>%
+  select(Survey, Q3.25) %>%
+    drop_na()
+
+Q3.25 <- Q3.25 %>%
+    subset(Q3.25 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.25, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.25)
+```
+```{r Q3.25 visualisations}
+ggplot(Q3.25, aes(x= factor(Survey), y = Pct, fill = Q3.25)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.45))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.25, aes(x= factor(Survey), y = n, fill = Q3.25)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,1500))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.25, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.25)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.26 To what extent are you comfortable with others using your data for the following?**
+
+**Q3.26_1 Replication studies (use of your data as a reference to determine whether they can be repeated under similar conditions)**
+```{r Q3.26_1}
+Q3.26_1 <-
+  sod2022 %>%
+  select(Survey, Q3.26_1) %>%
+    drop_na()
+
+Q3.26_1 <- Q3.26_1 %>%
+  subset(Q3.26_1 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.26_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.26_1$Q3.26_1 <- factor(Q3.26_1$Q3.26_1, levels = c("Extremely uncomfortable", "Somewhat uncomfortable", "Neutral", "Somewhat comfortable", "Extremely comfortable", "I don't know"))
+
+kable(Q3.26_1)
+```
+```{r Q3.26_1 visualisations}
+ggplot(Q3.26_1, aes(x= factor(Survey), y = Pct, fill = Q3.26_1)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.55))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.26_1, aes(x= factor(Survey), y = n, fill = Q3.26_1)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2500))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.26_1, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.26_1)) +
+  xlab("") + ylab("Percentage") +
+  scale_x_continuous(breaks = 2021:2022) +  
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.26_2 Reanalysis (using a different method to analyse your data set)**
+```{r Q3.26_2}
+Q3.26_2 <-
+  sod2022 %>%
+  select(Survey, Q3.26_2) %>%
+    drop_na()
+
+Q3.26_2 <- Q3.26_2 %>%
+  subset(Q3.26_2 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.26_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.26_2$Q3.26_2 <- factor(Q3.26_2$Q3.26_2, levels = c("Extremely uncomfortable", "Somewhat uncomfortable", "Neutral", "Somewhat comfortable", "Extremely comfortable", "I don't know"))
+
+kable(Q3.26_2)
+```
+```{r Q3.26_2 visualisations}
+ggplot(Q3.26_2, aes(x= factor(Survey), y = Pct, fill = Q3.26_2)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.50))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.26_2, aes(x= factor(Survey), y = n, fill = Q3.26_2)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2400))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.26_2, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.26_2)) +
+  xlab("") + ylab("Percentage") +
+  scale_x_continuous(breaks = 2021:2022) +  
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.26_3 Reinterpretation (using your data as is to answer another question)**
+```{r Q3.26_3}
+Q3.26_3 <-
+  sod2022 %>%
+  select(Survey, Q3.26_3) %>%
+    drop_na()
+
+Q3.26_3 <- Q3.26_3 %>%
+  subset(Q3.26_3 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.26_3, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.26_3$Q3.26_3 <- factor(Q3.26_3$Q3.26_3, levels = c("Extremely uncomfortable", "Somewhat uncomfortable", "Neutral", "Somewhat comfortable", "Extremely comfortable", "I don't know"))
+
+kable(Q3.26_3)
+```
+```{r Q3.26_3 visualisations}
+ggplot(Q3.26_3, aes(x= factor(Survey), y = Pct, fill = Q3.26_3)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.50))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.26_3, aes(x= factor(Survey), y = n, fill = Q3.26_3)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2300))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.26_3, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.26_3)) +
+  xlab("") + ylab("Percentage") +
+  scale_x_continuous(breaks = 2021:2022) +  
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.26_4 Isolated reuse (reanalysing your data to answer a new question)**
+```{r Q3.26_4}
+Q3.26_4 <-
+  sod2022 %>%
+  select(Survey, Q3.26_4) %>%
+    drop_na()
+
+Q3.26_4 <- Q3.26_4 %>%
+  subset(Q3.26_4 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.26_4, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.26_4$Q3.26_4 <- factor(Q3.26_4$Q3.26_4, levels = c("Extremely uncomfortable", "Somewhat uncomfortable", "Neutral", "Somewhat comfortable", "Extremely comfortable", "I don't know"))
+
+kable(Q3.26_4)
+```
+```{r Q3.26_4 visualisations}
+ggplot(Q3.26_4, aes(x= factor(Survey), y = Pct, fill = Q3.26_4)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.50))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.26_4, aes(x= factor(Survey), y = n, fill = Q3.26_4)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2400))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.26_4, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.26_4)) +
+  xlab("") + ylab("Percentage") +
+  scale_x_continuous(breaks = 2021:2022) +  
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.26_5 Combination reuse (reanalysing your data in combination with other data sets to answer a new question)**
+```{r Q3.26_5}
+Q3.26_5 <-
+  sod2022 %>%
+  select(Survey, Q3.26_5) %>%
+    drop_na()
+
+Q3.26_5 <- Q3.26_5 %>%
+  subset(Q3.26_5 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.26_5, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.26_5$Q3.26_5 <- factor(Q3.26_5$Q3.26_5, levels = c("Extremely uncomfortable", "Somewhat uncomfortable", "Neutral", "Somewhat comfortable", "Extremely comfortable", "I don't know"))
+
+kable(Q3.26_5)
+```
+```{r Q3.26_5 visualisations}
+ggplot(Q3.26_5, aes(x= factor(Survey), y = Pct, fill = Q3.26_5)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.52))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.26_5, aes(x= factor(Survey), y = n, fill = Q3.26_5)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2600))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.26_5, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.26_5)) +
+  xlab("") + ylab("Percentage") +
+  scale_x_continuous(breaks = 2021:2022) +  
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+ 	 
+**Q3.27 What areas, if any, do you feel you need help with in regard to making your research data openly available? (Please select all that apply)**
+```{r Q3.27}
+Q3.27_1 <-
+  select(sod2022, Survey, Q3.27_1) %>%
+  group_by(Survey) %>%
+  count(Q3.27_1) %>%
+  filter(Q3.27_1 != "0") %>%
+  rename("Q3.27" = "Q3.27_1")
+
+Q3.27_2 <-
+  select(sod2022, Survey, Q3.27_2) %>%
+  group_by(Survey) %>%
+  count(Q3.27_2) %>%
+  filter(Q3.27_2 != "0") %>%
+  rename("Q3.27" = "Q3.27_2")
+
+Q3.27_3 <-
+  select(sod2022, Survey, Q3.27_3) %>%
+  group_by(Survey) %>%
+  count(Q3.27_3) %>%
+  filter(Q3.27_3 != "0") %>%
+  rename("Q3.27" = "Q3.27_3")
+
+Q3.27_4 <-
+  select(sod2022, Survey, Q3.27_4) %>%
+  group_by(Survey) %>%
+  count(Q3.27_4) %>%
+  filter(Q3.27_4 != "0") %>%
+  rename("Q3.27" = "Q3.27_4")
+
+Q3.27_5 <-
+  select(sod2022, Survey, Q3.27_5) %>%
+  group_by(Survey) %>%
+  count(Q3.27_5) %>%
+  filter(Q3.27_5 != "0") %>%
+  rename("Q3.27" = "Q3.27_5")
+
+Q3.27_6 <-
+  select(sod2022, Survey, Q3.27_6) %>%
+  group_by(Survey) %>%
+  count(Q3.27_6) %>%
+  filter(Q3.27_6 != "0") %>%
+  rename("Q3.27" = "Q3.27_6")
+
+Q3.27_7 <-
+  select(sod2022, Survey, Q3.27_7) %>%
+  group_by(Survey) %>%
+  count(Q3.27_7) %>%
+  filter(Q3.27_7 != "0") %>%
+  rename("Q3.27" = "Q3.27_7")
+
+Q3.27 <- rbind(Q3.27_1, Q3.27_2, Q3.27_3, Q3.27_4, Q3.27_5, Q3.27_6, Q3.27_7)
+rm(Q3.27_1, Q3.27_2, Q3.27_3, Q3.27_4, Q3.27_5, Q3.27_6, Q3.27_7)
+
+# Keep only valid responses
+Q3.27 <- 
+  Q3.27 %>%
+  group_by(Survey) %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.27)
+
+Q3.27$Q3.27 <-
+  recode_factor(Q3.27$Q3.27,
+                "Finding the time to manage my data" = "Find time",
+                "Creating time to manage activity" = "Find time",
+                "Data Management Plans" = "DMPs",
+                "Data management policies" = "Policies",
+                "Curation of data" = "Curation",
+                "Finding appropriate repositories for deposition of data" = "Find repository",
+                "Finding appropriate funds for deposition of data long term" = "Find funds",
+                "Other (please specify)" = "Other")
+```
+```{r Q3.27 visualisations}
+ggplot(Q3.27, aes(x= factor(Survey), y = Pct, fill = Q3.27)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.4))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.27, aes(x= factor(Survey), y = n, fill = Q3.27)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,3200))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.27, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.27)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+## Discovery, reuse and citation of Open Data
+
+**Q3.28 Since January 2020, have you reused any of the below as part of your research?: (Please select all that apply) [Note: by 'reuse' we mean undertaking new analysis of a pre-existing data set, either on its own or to add to another data set, to answer a different research question to that which the collection of data was originally intended]**
+```{r Q3.28}
+Q3.28_1 <-
+  select(sod2022, Survey, Q3.28_1) %>%
+  group_by(Survey) %>%
+  count(Q3.28_1) %>%
+  filter(Q3.28_1 != "0",
+         Survey > 2019) %>%
+  rename("Q3.28" = "Q3.28_1")
+
+Q3.28_2 <-
+  select(sod2022, Survey, Q3.28_2) %>%
+  group_by(Survey) %>%
+  count(Q3.28_2) %>%
+  filter(Q3.28_2 != "0",
+         Survey > 2019) %>%
+  rename("Q3.28" = "Q3.28_2")
+
+Q3.28_3 <-
+  select(sod2022, Survey, Q3.28_3) %>%
+  group_by(Survey) %>%
+  count(Q3.28_3) %>%
+  filter(Q3.28_3 != "0",
+         Survey > 2019) %>%
+  rename("Q3.28" = "Q3.28_3")
+
+Q3.28 <- rbind(Q3.28_1, Q3.28_2, Q3.28_3)
+rm(Q3.28_1, Q3.28_2, Q3.28_3)
+
+# Include all responses
+Q3.28 <- Q3.28 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.28)
+```
+```{r Q3.28 visualisations}
+ggplot(Q3.28, aes(x=Survey, y=Pct, fill=Q3.28)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+
+ggplot(Q3.28, aes(x=(Survey), y = n, fill = Q3.28)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = 1.3,
+            size = 3) +  
+  scale_x_continuous(breaks = 2020:2022) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  )+
+  guides(fill=guide_legend(nrow = 3, byrow=TRUE))
+
+ggplot(Q3.28, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.28)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2016:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+) +
+  guides(color=guide_legend(nrow = 3, byrow=TRUE))
+```
+
+**Q3.29 To what extent has the COVID-19 pandemic affected your reuse of data?**
+**Q3.29_1 Your own data**
+```{r Q3.29_1}
+Q3.29_1 <-
+  sod2022 %>%
+  select(Survey, Q3.29_1) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.29_1 <- Q3.29_1 %>%
+    group_by(Survey) %>%
+    subset(Q3.29_1 != 0) %>%
+  count(Q3.29_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.29_1)
+
+Q3.29_1$Q3.29_1 <-
+  recode_factor(Q3.29_1$Q3.29_1,
+                "My reuse of data has not changed since the onset of the pandemic" = "Not changed",
+                "I have reused it somewhat more since the onset of the pandemic"  = "Somewhat",
+                "I have reused it a lot more since the onset of the pandemic" = "A lot more",
+                "I have reused it somewhat less since the onset of the pandemic" = "Somewhat less",
+                "I have reused it a lot less since the onset of the pandemic" = "A lot less"
+                )
+
+Q3.29_1$Q3.29_1 <-
+  factor(Q3.29_1$Q3.29_1,
+         labels = c("A lot more",
+                    "Somewhat more",
+                    "Not changed",
+                    "Somewhat less",
+                    "A lot less"
+                    )
+         )
+```
+```{r Q3.29_1 visualisations}
+ggplot(Q3.29_1, aes(x=factor(Survey), y=Pct, fill=Q3.29_1)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+
+ggplot(Q3.29_1, aes(x=(Survey), y = n, fill = Q3.29_1)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_x_continuous(breaks = 2021:2022) +
+  scale_y_continuous(limits = c(0,1500))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  )
+
+ggplot(Q3.29_1, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.29_1)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2021:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.29_2 Data shared by other research groups (whether openly or on personal request)**
+```{r Q3.29_2}
+Q3.29_2 <-
+  sod2022 %>%
+  select(Survey, Q3.29_2) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.29_2 <- Q3.29_2 %>%
+    group_by(Survey) %>%
+    subset(Q3.29_2 != 0) %>%
+  count(Q3.29_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.29_2)
+
+Q3.29_2$Q3.29_2 <-
+  recode_factor(Q3.29_2$Q3.29_2,
+                "My reuse of data has not changed since the onset of the pandemic" = "Not changed",
+                "I have reused it somewhat more since the onset of the pandemic"  = "Somewhat",
+                "I have reused it a lot more since the onset of the pandemic" = "A lot more",
+                "I have reused it somewhat less since the onset of the pandemic" = "Somewhat less",
+                "I have reused it a lot less since the onset of the pandemic" = "A lot less"
+                )
+
+Q3.29_2$Q3.29_2 <-
+  factor(Q3.29_2$Q3.29_2,
+         labels = c("A lot more",
+                    "Somewhat more",
+                    "Not changed",
+                    "Somewhat less",
+                    "A lot less"
+                    )
+         )
+```
+```{r Q3.29_2 visualisations}
+ggplot(Q3.29_2, aes(x=factor(Survey), y=Pct, fill=Q3.29_2)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+
+ggplot(Q3.29_2, aes(x=(Survey), y = n, fill = Q3.29_2)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_x_continuous(breaks = 2021:2022) +
+  scale_y_continuous(limits = c(0,900))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  )
+
+ggplot(Q3.29_2, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.29_2)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2021:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.30 Where have you previously obtained research data which has been collected by other research groups, for your own reuse?**
+```{r Q3.30}
+Q3.30_1 <-
+  select(sod2022, Survey, Q3.30_1) %>%
+  count(Q3.30_1) %>%
+  filter(Q3.30_1 != "0") %>%
+  rename("Q3.30" = "Q3.30_1")
+
+Q3.30_2 <-
+  select(sod2022, Survey, Q3.30_2) %>%
+  count(Q3.30_2) %>%
+  filter(Q3.30_2 != "0") %>%
+  rename("Q3.30" = "Q3.30_2")
+
+Q3.30_3 <-
+  select(sod2022, Survey, Q3.30_3) %>%
+  count(Q3.30_3) %>%
+  filter(Q3.30_3 != "0") %>%
+  rename("Q3.30" = "Q3.30_3")
+
+Q3.30_4 <-
+  select(sod2022, Survey, Q3.30_4) %>%
+  count(Q3.30_4) %>%
+  filter(Q3.30_4 != "0") %>%
+  rename("Q3.30" = "Q3.30_4")
+
+Q3.30_5 <-
+  select(sod2022, Survey, Q3.30_5) %>%
+  count(Q3.30_5) %>%
+  filter(Q3.30_5 != "0") %>%
+  rename("Q3.30" = "Q3.30_5")
+
+Q3.30_6 <-
+  select(sod2022, Survey, Q3.30_6) %>%
+  count(Q3.30_6) %>%
+  filter(Q3.30_6 != "0") %>%
+  rename("Q3.30" = "Q3.30_6")
+
+Q3.30 <- rbind(Q3.30_1, Q3.30_2, Q3.30_3, Q3.30_4, Q3.30_5, Q3.30_6)
+rm(Q3.30_1, Q3.30_2, Q3.30_3, Q3.30_4, Q3.30_5, Q3.30_6)
+
+# Keep only valid responses
+Q3.30 <- Q3.30 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.30)
+
+Q3.30$Q3.30 <-
+  recode_factor(Q3.30$Q3.30,
+                "Downloaded directly from a data repository" = "Repository",
+                "Data were available within a published research article" = "Research article",
+                "Data were linked from a published data article" = "Data article",
+                "Directly from the researcher who collected the data (e.g. via email)" = "On request",
+                "Data were available from a blog post" = "Blog post",
+                "Other (please specify)" = "Other"
+  )
+```
+```{r Q3.30 visualisations}
+ggplot(Q3.30, aes(x = "", y = n, fill = Q3.30)) +
+  geom_bar(stat = "identity", width = .375) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+) +
+  coord_flip()
+
+ggplot(Q3.30, aes(x = reorder(Q3.30, n), y = Pct * 100)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            hjust = 1.3,
+            size = 3,
+            colour = "#FFFFFF") +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+) +
+  coord_flip()
+```
+
+**Q3.31 How would you rate the importance of each of the following with reference to determining the quality of an openly accessible data set? [Note: by open we mean free to access, reuse, repurpose and redistribute]**
+**Q3.31_1 The data are available from a publicly available repository**
+```{r Q3.31_1}
+Q3.31_1 <-
+  sod2022 %>%
+  select(Survey, Q3.31_1) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.31_1 <- Q3.31_1 %>%
+    group_by(Survey) %>%
+    subset(Q3.31_1 != 0) %>%
+  count(Q3.31_1, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.31_1$Q3.31_1 <- factor(Q3.31_1$Q3.31_1, levels = c("Not at all important", "Slightly important", "Moderately important", "Somewhat important", "Extremely important", "I don't know"))
+
+kable(Q3.31_1)
+```
+```{r Q3.31_1 visualisations}
+ggplot(Q3.31_1, aes(x=factor(Survey), y=Pct, fill=Q3.31_1)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+ggplot(Q3.31_1, aes(x=(Survey), y = n, fill = Q3.31_1)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_x_continuous(breaks = 2021:2022) +
+  scale_y_continuous(limits = c(0,2700))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+
+ggplot(Q3.31_1, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.31_1)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2021:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+) +
+  guides(color=guide_legend(nrow = 2, byrow=TRUE))
+```
+
+**Q3.31_2 The data are new (e.g. released within the last year)**
+```{r Q3.31_2}
+Q3.31_2 <-
+  sod2022 %>%
+  select(Survey, Q3.31_2) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.31_2 <- Q3.31_2 %>%
+    group_by(Survey) %>%
+    subset(Q3.31_2 != 0) %>%
+  count(Q3.31_2, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.31_2$Q3.31_2 <- factor(Q3.31_2$Q3.31_2, levels = c("Not at all important", "Slightly important", "Moderately important", "Somewhat important", "Extremely important", "I don't know"))
+
+kable(Q3.31_2)
+```
+```{r Q3.31_2 visualisations}
+ggplot(Q3.31_2, aes(x=factor(Survey), y=Pct, fill=Q3.31_2)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+ggplot(Q3.31_2, aes(x=(Survey), y = n, fill = Q3.31_2)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_x_continuous(breaks = 2021:2022) +
+  scale_y_continuous(limits = c(0,1700))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+
+ggplot(Q3.31_2, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.31_2)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2021:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+) +
+  guides(color=guide_legend(nrow = 2, byrow=TRUE))
+```
+
+**Q3.31_3 The data come from a known source (e.g. familiar institution or academic)**
+```{r Q3.31_3}
+Q3.31_3 <-
+  sod2022 %>%
+  select(Survey, Q3.31_3) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.31_3 <- Q3.31_3 %>%
+    group_by(Survey) %>%
+    subset(Q3.31_3 != 0) %>%
+  count(Q3.31_3, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.31_3$Q3.31_3 <- factor(Q3.31_3$Q3.31_3, levels = c("Not at all important", "Slightly important", "Moderately important", "Somewhat important", "Extremely important", "I don't know"))
+
+kable(Q3.31_3)
+```
+```{r Q3.31_3 visualisations}
+ggplot(Q3.31_3, aes(x=factor(Survey), y=Pct, fill=Q3.31_3)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+ggplot(Q3.31_3, aes(x=(Survey), y = n, fill = Q3.31_3)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_x_continuous(breaks = 2021:2022) +
+  scale_y_continuous(limits = c(0,2500))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+
+ggplot(Q3.31_3, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.31_3)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2021:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+) +
+  guides(color=guide_legend(nrow = 2, byrow=TRUE))
+```
+
+**Q3.31_4 The data are in a repository that I know checks/curates the data**
+```{r Q3.31_4}
+Q3.31_4 <-
+  sod2022 %>%
+  select(Survey, Q3.31_4) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.31_4 <- Q3.31_4 %>%
+    group_by(Survey) %>%
+    subset(Q3.31_4 != 0) %>%
+  count(Q3.31_4, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.31_4$Q3.31_4 <- factor(Q3.31_4$Q3.31_4, levels = c("Not at all important", "Slightly important", "Moderately important", "Somewhat important", "Extremely important", "I don't know"))
+
+kable(Q3.31_4)
+```
+```{r Q3.31_4 visualisations}
+ggplot(Q3.31_4, aes(x=factor(Survey), y=Pct, fill=Q3.31_4)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+ggplot(Q3.31_4, aes(x=(Survey), y = n, fill = Q3.31_4)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_x_continuous(breaks = 2021:2022) +
+  scale_y_continuous(limits = c(0,2100))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+
+ggplot(Q3.31_4, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.31_4)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2021:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+) +
+  guides(color=guide_legend(nrow = 2, byrow=TRUE))
+```
+
+**Q3.31_5 The data are associated with a peer-reviewed article**
+```{r Q3.31_5}
+Q3.31_5 <-
+  sod2022 %>%
+  select(Survey, Q3.31_5) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.31_5 <- Q3.31_5 %>%
+    group_by(Survey) %>%
+    subset(Q3.31_5 != 0) %>%
+  count(Q3.31_5, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.31_5$Q3.31_5 <- factor(Q3.31_5$Q3.31_5, levels = c("Not at all important", "Slightly important", "Moderately important", "Somewhat important", "Extremely important", "I don't know"))
+
+kable(Q3.31_5)
+```
+```{r Q3.31_5 visualisations}
+ggplot(Q3.31_5, aes(x=factor(Survey), y=Pct, fill=Q3.31_5)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+ggplot(Q3.31_5, aes(x=(Survey), y = n, fill = Q3.31_5)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_x_continuous(breaks = 2021:2022) +
+  scale_y_continuous(limits = c(0,2300))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+
+ggplot(Q3.31_5, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.31_5)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2021:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+) +
+  guides(color=guide_legend(nrow = 2, byrow=TRUE))
+```
+
+**Q3.31_6 Data visualisations (e.g. figures, charts) reflect the true state of the source data**
+```{r Q3.31_6}
+Q3.31_6 <-
+  sod2022 %>%
+  select(Survey, Q3.31_6) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.31_6 <- Q3.31_6 %>%
+    group_by(Survey) %>%
+    subset(Q3.31_6 != 0) %>%
+  count(Q3.31_6, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.31_6$Q3.31_6 <- factor(Q3.31_6$Q3.31_6, levels = c("Not at all important", "Slightly important", "Moderately important", "Somewhat important", "Extremely important", "I don't know"))
+
+kable(Q3.31_6)
+```
+```{r Q3.31_6 visualisations}
+ggplot(Q3.31_6, aes(x=factor(Survey), y=Pct, fill=Q3.31_6)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+ggplot(Q3.31_6, aes(x=(Survey), y = n, fill = Q3.31_6)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_x_continuous(breaks = 2021:2022) +
+  scale_y_continuous(limits = c(0,2100))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+
+ggplot(Q3.31_6, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.31_6)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2021:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+) +
+  guides(color=guide_legend(nrow = 2, byrow=TRUE))
+```
+
+**Q3.31_7 Data is consistent with previously published findings**
+```{r Q3.31_7}
+Q3.31_7 <-
+  sod2022 %>%
+  select(Survey, Q3.31_7) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.31_7 <- Q3.31_7 %>%
+    group_by(Survey) %>%
+    subset(Q3.31_7 != 0) %>%
+  count(Q3.31_7, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.31_7$Q3.31_7 <- factor(Q3.31_7$Q3.31_7, levels = c("Not at all important", "Slightly important", "Moderately important", "Somewhat important", "Extremely important", "I don't know"))
+
+kable(Q3.31_7)
+```
+```{r Q3.31_7 visualisations}
+ggplot(Q3.31_7, aes(x=factor(Survey), y=Pct, fill=Q3.31_7)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+ggplot(Q3.31_7, aes(x=(Survey), y = n, fill = Q3.31_7)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_x_continuous(breaks = 2021:2022) +
+  scale_y_continuous(limits = c(0,1900))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+
+ggplot(Q3.31_7, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.31_7)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2021:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+) +
+  guides(color=guide_legend(nrow = 2, byrow=TRUE))
+```
+
+**Q3.31_8 The data set is complete for my needs**
+```{r Q3.31_8}
+Q3.31_8 <-
+  sod2022 %>%
+  select(Survey, Q3.31_8) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.31_8 <- Q3.31_8 %>%
+    group_by(Survey) %>%
+    subset(Q3.31_8 != 0) %>%
+  count(Q3.31_8, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.31_8$Q3.31_8 <- factor(Q3.31_8$Q3.31_8, levels = c("Not at all important", "Slightly important", "Moderately important", "Somewhat important", "Extremely important", "I don't know"))
+
+kable(Q3.31_8)
+```
+```{r Q3.31_8 visualisations}
+ggplot(Q3.31_8, aes(x=factor(Survey), y=Pct, fill=Q3.31_8)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+ggplot(Q3.31_8, aes(x=(Survey), y = n, fill = Q3.31_8)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_x_continuous(breaks = 2021:2022) +
+  scale_y_continuous(limits = c(0,2300))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+
+ggplot(Q3.31_8, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.31_8)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2021:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+) +
+  guides(color=guide_legend(nrow = 2, byrow=TRUE))
+```
+
+**Q3.31_9 Associated metadata give me confidence in the quality of the data**
+```{r Q3.31_9}
+Q3.31_9 <-
+  sod2022 %>%
+  select(Survey, Q3.31_9) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.31_9 <- Q3.31_9 %>%
+    group_by(Survey) %>%
+    subset(Q3.31_9 != 0) %>%
+  count(Q3.31_9, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+Q3.31_9$Q3.31_9 <- factor(Q3.31_9$Q3.31_9, levels = c("Not at all important", "Slightly important", "Moderately important", "Somewhat important", "Extremely important", "I don't know"))
+
+kable(Q3.31_9)
+```
+```{r Q3.31_9 visualisations}
+ggplot(Q3.31_9, aes(x=factor(Survey), y=Pct, fill=Q3.31_9)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+ggplot(Q3.31_9, aes(x=(Survey), y = n, fill = Q3.31_9)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_x_continuous(breaks = 2021:2022) +
+  scale_y_continuous(limits = c(0,2800))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  guides(fill=guide_legend(nrow = 2, byrow=TRUE))
+
+
+ggplot(Q3.31_9, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.31_9)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  scale_x_continuous(breaks = 2021:2022) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+) +
+  guides(color=guide_legend(nrow = 2, byrow=TRUE))
+```
+
+**Q3.32 Has your request and/or reuse of a dataset ever resulted in a collaboration?**
+```{r Q3.32}
+Q3.32 <-
+  sod2022 %>%
+  select(Survey, Q3.32) %>%
+    drop_na()
+
+Q3.32 <- Q3.32 %>%
+    subset(Q3.32 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.32, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+kable(Q3.32)
+```
+```{r Q3.32 visualisations}
+ggplot(Q3.32, aes(x="", y=n, fill=Q3.32)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  guides(fill=guide_legend(nrow = 1, byrow=TRUE))
+```
+
+## Support for researchers and Open Data
+
+**Q3.33 If you required help with managing or making your research data openly available, which sources would you rely upon? (Please select all that apply) [Note: by open we mean free to access, reuse, repurpose and redistribute]**
+```{r Q3.33}
+# Select all that apply
+Q3.33_1 <-
+  select(sod2022, Survey, Q3.33_1) %>%
+  group_by(Survey) %>%
+  count(Q3.33_1) %>%
+  filter(Q3.33_1 != "0") %>%
+  rename("Q3.33" = "Q3.33_1")
+
+Q3.33_2 <-
+  select(sod2022, Survey, Q3.33_2) %>%
+  group_by(Survey) %>%
+  count(Q3.33_2) %>%
+  filter(Q3.33_2 != "0") %>%
+  rename("Q3.33" = "Q3.33_2")
+
+Q3.33_3 <-
+  select(sod2022, Survey, Q3.33_3) %>%
+  group_by(Survey) %>%
+  count(Q3.33_3) %>%
+  filter(Q3.33_3 != "0") %>%
+  rename("Q3.33" = "Q3.33_3")
+
+Q3.33_4 <-
+  select(sod2022, Survey, Q3.33_4) %>%
+  group_by(Survey) %>%
+  count(Q3.33_4) %>%
+  filter(Q3.33_4 != "0") %>%
+  rename("Q3.33" = "Q3.33_4")
+
+Q3.33_5 <-
+  select(sod2022, Survey, Q3.33_5) %>%
+  group_by(Survey) %>%
+  count(Q3.33_5) %>%
+  filter(Q3.33_5 != "0") %>%
+  rename("Q3.33" = "Q3.33_5")
+
+Q3.33_6 <-
+  select(sod2022, Survey, Q3.33_6) %>%
+  group_by(Survey) %>%
+  count(Q3.33_6) %>%
+  filter(Q3.33_6 != "0") %>%
+  rename("Q3.33" = "Q3.33_6")
+
+Q3.33_7 <-
+  select(sod2022, Survey, Q3.33_7) %>%
+  group_by(Survey) %>%
+  count(Q3.33_7) %>%
+  filter(Q3.33_7 != "0") %>%
+  rename("Q3.33" = "Q3.33_7")
+
+Q3.33_8 <-
+  select(sod2022, Survey, Q3.33_8) %>%
+  group_by(Survey) %>%
+  count(Q3.33_8) %>%
+  filter(Q3.33_8 != "0") %>%
+  rename("Q3.33" = "Q3.33_8")
+
+Q3.33_9 <-
+  select(sod2022, Survey, Q3.33_9) %>%
+  group_by(Survey) %>%
+  count(Q3.33_9) %>%
+  filter(Q3.33_9 != "0") %>%
+  rename("Q3.33" = "Q3.33_9")
+
+Q3.33_10 <-
+  select(sod2022, Survey, Q3.33_10) %>%
+  group_by(Survey) %>%
+  count(Q3.33_10) %>%
+  filter(Q3.33_10 != "0") %>%
+  rename("Q3.33" = "Q3.33_10")
+
+Q3.33_11 <-
+  select(sod2022, Survey, Q3.33_11) %>%
+  group_by(Survey) %>%
+  count(Q3.33_11) %>%
+  filter(Q3.33_11 != "0") %>%
+  rename("Q3.33" = "Q3.33_11")
+
+Q3.33 <- rbind(Q3.33_1, Q3.33_2, Q3.33_3, Q3.33_4, Q3.33_5, Q3.33_6, Q3.33_7, Q3.33_8, Q3.33_9, Q3.33_10, Q3.33_11)
+rm(Q3.33_1, Q3.33_2, Q3.33_3, Q3.33_4, Q3.33_5, Q3.33_6, Q3.33_7, Q3.33_8, Q3.33_9, Q3.33_10, Q3.33_11)
+
+# Keep only valid responses
+Q3.33 <- 
+  Q3.33 %>%
+  group_by(Survey) %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.33)
+
+Q3.33$Q3.33 <-
+  recode_factor(Q3.33$Q3.33,
+    "I would not require help making my data openly available" = "No help required"
+  )
+```
+```{r Q3.33 visualisations}
+ggplot(Q3.33, aes(x= factor(Survey), y = Pct, fill = Q3.33)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.35))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.33, aes(x= factor(Survey), y = n, fill = Q3.33)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2600))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.33, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.33)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.34 Have you ever received any support with planning, managing or sharing your research data?**
+```{r Q3.34}
+Q3.34 <-
+  sod2022 %>%
+  select(Survey, Q3.34) %>%
+    drop_na()
+
+Q3.34 <- Q3.34 %>%
+    subset(Q3.34 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.34, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), digits = 3))
+
+kable(Q3.34)
+```
+```{r Q3.34 visualisations}
+ggplot(Q3.34, aes(x = "", y = n, fill = Q3.34)) +
+  geom_bar(stat = "identity", width = .375) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+) +
+  coord_flip()
+```
+
+**Q3.35 Who did you receive support from? (Please select all that apply)**
+```{r Q3.35}
+Q3.35_1 <-
+  select(sod2022, Survey, Q3.35_1) %>%
+  group_by(Survey) %>%
+  count(Q3.35_1) %>%
+  filter(Q3.35_1 != "0") %>%
+  rename("Q3.35" = "Q3.35_1")
+
+Q3.35_2 <-
+  select(sod2022, Survey, Q3.35_2) %>%
+  group_by(Survey) %>%
+  count(Q3.35_2) %>%
+  filter(Q3.35_2 != "0") %>%
+  rename("Q3.35" = "Q3.35_2")
+
+Q3.35_3 <-
+  select(sod2022, Survey, Q3.35_3) %>%
+  group_by(Survey) %>%
+  count(Q3.35_3) %>%
+  filter(Q3.35_3 != "0") %>%
+  rename("Q3.35" = "Q3.35_3")
+
+Q3.35_4 <-
+  select(sod2022, Survey, Q3.35_4) %>%
+  group_by(Survey) %>%
+  count(Q3.35_4) %>%
+  filter(Q3.35_4 != "0") %>%
+  rename("Q3.35" = "Q3.35_4")
+
+Q3.35_5 <-
+  select(sod2022, Survey, Q3.35_5) %>%
+  group_by(Survey) %>%
+  count(Q3.35_5) %>%
+  filter(Q3.35_5 != "0") %>%
+  rename("Q3.35" = "Q3.35_5")
+
+Q3.35_6 <-
+  select(sod2022, Survey, Q3.35_6) %>%
+  group_by(Survey) %>%
+  count(Q3.35_6) %>%
+  filter(Q3.35_6 != "0") %>%
+  rename("Q3.35" = "Q3.35_6")
+
+Q3.35_7 <-
+  select(sod2022, Survey, Q3.35_7) %>%
+  group_by(Survey) %>%
+  count(Q3.35_7) %>%
+  filter(Q3.35_7 != "0") %>%
+  rename("Q3.35" = "Q3.35_7")
+
+Q3.35_8 <-
+  select(sod2022, Survey, Q3.35_8) %>%
+  group_by(Survey) %>%
+  count(Q3.35_8) %>%
+  filter(Q3.35_8 != "0") %>%
+  rename("Q3.35" = "Q3.35_8")
+
+Q3.35_9 <-
+  select(sod2022, Survey, Q3.35_9) %>%
+  group_by(Survey) %>%
+  count(Q3.35_9) %>%
+  filter(Q3.35_9 != "0") %>%
+  rename("Q3.35" = "Q3.35_9")
+
+Q3.35_10 <-
+  select(sod2022, Survey, Q3.35_10) %>%
+  group_by(Survey) %>%
+  count(Q3.35_10) %>%
+  filter(Q3.35_10 != "0") %>%
+  rename("Q3.35" = "Q3.35_10")
+
+Q3.35 <- rbind(Q3.35_1, Q3.35_2, Q3.35_3, Q3.35_4, Q3.35_5, Q3.35_6, Q3.35_7, Q3.35_8, Q3.35_9, Q3.35_10)
+rm(Q3.35_1, Q3.35_2, Q3.35_3, Q3.35_4, Q3.35_5, Q3.35_6, Q3.35_7, Q3.35_8, Q3.35_9, Q3.35_10)
+
+# Keep only valid responses
+Q3.35 <- 
+  Q3.35 %>%
+  group_by(Survey) %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.35)
+```
+```{r Q3.35 visualisations}
+ggplot(Q3.35, aes(x= reorder(Q3.35, n), y = Pct * 100)) +
+  geom_col(position = position_dodge()) +
+  scale_y_continuous(limits = c(0,27))  +
+  geom_text(aes(label = paste0(n," ","(",round(Pct * 100),"%",")")),
+    hjust = -0.2,
+    size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+) +
+  coord_flip()
+```
+
+**Q3.36 What level of support do you think is available from the following if you needed help in planning, managing or sharing your research data?**
+**Q3.36_1 Institution/Organisation**	
+**Q3.36_2 Funder**
+**Q3.36_3 Publisher**
+```{r Q3.36}
+Q3.36_1 <-
+  select(sod2022, Survey, Q3.36_1) %>%
+  count(Q3.36_1) %>%
+  filter(Q3.36_1 != "0") %>%
+  mutate(Support = "Institution/Organisation",
+         Pct = round(n / sum(n), 3)) %>%
+  rename("Q3.36" = "Q3.36_1")
+
+Q3.36_2 <-
+  select(sod2022, Survey, Q3.36_2) %>%
+  count(Q3.36_2) %>%
+  filter(Q3.36_2 != "0") %>%
+  mutate(Support = "Funder",
+         Pct = round(n / sum(n), 3)) %>% 
+  rename("Q3.36" = "Q3.36_2")
+
+Q3.36_3 <-
+  select(sod2022, Survey, Q3.36_3) %>%
+  count(Q3.36_3) %>%
+  filter(Q3.36_3 != "0") %>%
+  mutate(Support = "Publisher",
+         Pct = round(n / sum(n), 3)) %>%
+  rename("Q3.36" = "Q3.36_3")
+
+Q3.36 <- rbind(Q3.36_1, Q3.36_2, Q3.36_3)
+rm(Q3.36_1, Q3.36_2, Q3.36_3)
+
+kable(Q3.36)
+```
+```{r Q3.36 visualisation}
+ggplot(Q3.36, aes(x=Support, y=Pct, fill=Q3.36)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+
+ggplot(Q3.36, aes(x=(Support), y = n, fill = Q3.36)) +
+  geom_col(position = position_dodge()) +
+  scale_y_continuous(limits = c(0,1400))  +  
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  )
+
+ggplot(Q3.36, aes(x=(Support), y = Pct, fill = Q3.36)) +
+  geom_col(position = position_dodge()) +
+  scale_y_continuous(limits = c(0,.34))  +  
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  )
+```
+
+
+**Q3.37 Considering your most recent piece of research, which, if any, of the following have a policy on data sharing? (Please select all that apply)**
+```{r Q3.37}
+Q3.37_1 <-
+  select(sod2022, Survey, Q3.37_1) %>%
+  group_by(Survey) %>%
+  count(Q3.37_1) %>%
+  filter(Q3.37_1 != "0") %>%
+  rename("Q3.37" = "Q3.37_1")
+
+Q3.37_2 <-
+  select(sod2022, Survey, Q3.37_2) %>%
+  group_by(Survey) %>%
+  count(Q3.37_2) %>%
+  filter(Q3.37_2 != "0") %>%
+  rename("Q3.37" = "Q3.37_2")
+
+Q3.37_3 <-
+  select(sod2022, Survey, Q3.37_3) %>%
+  group_by(Survey) %>%
+  count(Q3.37_3) %>%
+  filter(Q3.37_3 != "0") %>%
+  rename("Q3.37" = "Q3.37_3")
+
+Q3.37_4 <-
+  select(sod2022, Survey, Q3.37_4) %>%
+  group_by(Survey) %>%
+  count(Q3.37_4) %>%
+  filter(Q3.37_4 != "0") %>%
+  rename("Q3.37" = "Q3.37_4")
+
+Q3.37_5 <-
+  select(sod2022, Survey, Q3.37_5) %>%
+  group_by(Survey) %>%
+  count(Q3.37_5) %>%
+  filter(Q3.37_5 != "0") %>%
+  rename("Q3.37" = "Q3.37_5")
+
+Q3.37_6 <-
+  select(sod2022, Survey, Q3.37_6) %>%
+  group_by(Survey) %>%
+  count(Q3.37_6) %>%
+  filter(Q3.37_6 != "0") %>%
+  rename("Q3.37" = "Q3.37_6")
+
+Q3.37_7 <-
+  select(sod2022, Survey, Q3.37_7) %>%
+  group_by(Survey) %>%
+  count(Q3.37_7) %>%
+  filter(Q3.37_7 != "0") %>%
+  rename("Q3.37" = "Q3.37_7")
+
+Q3.37 <- rbind(Q3.37_1, Q3.37_2, Q3.37_3, Q3.37_4, Q3.37_5, Q3.37_6, Q3.37_7)
+rm(Q3.37_1, Q3.37_2, Q3.37_3, Q3.37_4, Q3.37_5, Q3.37_6, Q3.37_7)
+
+# Keep only valid responses
+Q3.37 <- Q3.37 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.37)
+```
+```{r Q3.37 visualisations}
+ggplot(Q3.37, aes(x= factor(Survey), y = Pct, fill = Q3.37)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.25))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.37, aes(x= factor(Survey), y = n, fill = Q3.37)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2200))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+```
+
+**Q3.38 Would you like more guidance on how to comply with the policies of any of the below on making your research data openly available? (Please select all that apply)**
+```{r Q3.38}
+Q3.38_1 <-
+  select(sod2022, Survey, Q3.38_1) %>%
+  group_by(Survey) %>%
+  count(Q3.38_1) %>%
+  filter(Q3.38_1 != "0") %>%
+  rename("Q3.38" = "Q3.38_1")
+
+Q3.38_2 <-
+  select(sod2022, Survey, Q3.38_2) %>%
+  group_by(Survey) %>%
+  count(Q3.38_2) %>%
+  filter(Q3.38_2 != "0") %>%
+  rename("Q3.38" = "Q3.38_2")
+
+Q3.38_3 <-
+  select(sod2022, Survey, Q3.38_3) %>%
+  group_by(Survey) %>%
+  count(Q3.38_3) %>%
+  filter(Q3.38_3 != "0") %>%
+  rename("Q3.38" = "Q3.38_3")
+
+Q3.38_4 <-
+  select(sod2022, Survey, Q3.38_4) %>%
+  group_by(Survey) %>%
+  count(Q3.38_4) %>%
+  filter(Q3.38_4 != "0") %>%
+  rename("Q3.38" = "Q3.38_4")
+
+Q3.38_5 <-
+  select(sod2022, Survey, Q3.38_5) %>%
+  group_by(Survey) %>%
+  count(Q3.38_5) %>%
+  filter(Q3.38_5 != "0") %>%
+  rename("Q3.38" = "Q3.38_5")
+
+Q3.38 <- rbind(Q3.38_1, Q3.38_2, Q3.38_3, Q3.38_4, Q3.38_5)
+rm(Q3.38_1, Q3.38_2, Q3.38_3, Q3.38_4, Q3.38_5)
+
+# Keep only valid responses
+Q3.38 <- Q3.38 %>%
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.38)
+```
+```{r Q3.38 visualisations}
+ggplot(Q3.38, aes(x= factor(Survey), y = Pct, fill = Q3.38)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,.36))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.38, aes(x= factor(Survey), y = n, fill = Q3.38)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100, digits = 0),"%")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 2.5) +
+  scale_y_continuous(limits = c(0,2900))  +
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = "") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+ggplot(Q3.38, aes(x= Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.38)) +
+  xlab("") + ylab("Percentage") +
+  scale_x_continuous(breaks = 2021:2022) +  
+  scale_color_discrete(name="") +
+   theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.39 How supportive would you be of a national mandate for making research data openly available?**
+```{r Q3.39}
+Q3.39 <-
+  sod2022 %>%
+  select(Survey, Q3.39) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.39 <- Q3.39 %>%
+  subset(Q3.39 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.39, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.39)
+
+Q3.39$Q3.39 <-
+  factor(Q3.39$Q3.39,
+         levels = c(
+           "Strongly support",
+           "Somewhat support",
+           "Neutral",
+           "Somewhat oppose",
+           "Strongly oppose"
+         )
+  )
+```
+```{r Q3.39 visualisations}
+ggplot(Q3.39, aes(x=Survey, y=Pct, fill=Q3.39)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  scale_x_continuous(breaks = 2016:2022) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+
+ggplot(Q3.39, aes(x=(Survey), y = n, fill = Q3.39)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 3) +  
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  scale_y_continuous(limits = c(0,3000)) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  )
+
+ggplot(Q3.39, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.39)) +
+  xlab("") + ylab("Percentage") +
+  scale_color_discrete(name="") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.40 Should funders make the sharing of research data part of their requirements for awarding grants?**
+```{r Q3.40}
+Q3.40 <-
+  sod2022 %>%
+  select(Survey, Q3.40) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.40 <- Q3.40 %>%
+  subset(Q3.40 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.40, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.40)
+```
+```{r Q3.40 visualisations}
+ggplot(Q3.40, aes(x=Survey, y=Pct, fill=Q3.40)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+
+ggplot(Q3.40, aes(x=(Survey), y = n, fill = Q3.40)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 3) +  
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  scale_y_continuous(limits = c(0,4200)) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  )
+
+ggplot(Q3.40, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.40)) +
+  xlab("") + ylab("Percentage") +
+  scale_x_continuous(breaks = 2019:2022) +
+  scale_color_discrete(name="") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
+
+**Q3.41 Should funders withhold funding from (or penalise in other ways) researchers who do not share their data if the funder has mandated that they do so at the grant application stage?**
+```{r Q3.41}
+Q3.41 <-
+  sod2022 %>%
+  select(Survey, Q3.41) %>%
+    drop_na()
+
+# Keep only valid responses
+Q3.41 <- Q3.41 %>%
+  subset(Q3.41 != 0) %>%
+    group_by(Survey) %>%
+  count(Q3.41, sort = TRUE) %>% 
+  mutate(Pct = round(n / sum(n), 3))
+
+kable(Q3.41)
+```
+```{r Q3.41 visualisations}
+ggplot(Q3.41, aes(x=Survey, y=Pct, fill=Q3.41)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(Pct * 100, digits = 0),"%","\n",n)),
+            position = position_stack(vjust = .5),
+            size = 3) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = ""
+  ) +
+  theme_classic() +
+   theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  theme(legend.position = "bottom") +
+  coord_flip()
+
+ggplot(Q3.41, aes(x=(Survey), y = n, fill = Q3.41)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = paste0(n,"\n",round(Pct * 100),"%", sep = "")),
+            position = position_dodge(width = 0.9),
+            vjust = -.3,
+            size = 3) +  
+  labs(
+    x = NULL,
+    y = NULL,
+    caption = "State of Open Data Survey 2022",
+    fill = ""
+  ) +
+  scale_y_continuous(limits = c(0,4200)) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_blank()
+  )
+
+ggplot(Q3.41, aes(x = Survey, y = Pct * 100)) +
+  geom_line(aes(colour = Q3.41)) +
+  xlab("") + ylab("Percentage") +
+  scale_x_continuous(breaks = 2019:2022) +
+  scale_color_discrete(name="") +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.line = element_blank(),
+    axis.ticks = element_blank()
+)
+```
